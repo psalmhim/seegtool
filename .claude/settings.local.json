@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(for ses in ses-task01 ses-task02 ses-task03 ses-task04 ses-task05 ses-task06 ses-task08 ses-task10)",
+      "Bash(do echo \"=== $ses ===\")",
+      "Read(//Volumes/OHDD/DATA/epilepsy/sub-EP01AN96M1047/**)",
+      "Bash(done)",
+      "Bash(for ses in ses-task01 ses-task02 ses-task03)",
+      "Bash(do echo \"=== $ses/ieeg ===\")",
+      "Read(//Volumes/OHDD/DATA/epilepsy/sub-EP01AN96M1047/$ses/**)",
+      "Bash(for ses in ses-task04 ses-task05 ses-task06 ses-task08 ses-task10)",
+      "Bash(do:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Bash(otool:*)",
+      "Bash(install_name_tool:*)",
+      "Bash(/Applications/MATLAB_R2025b.app/bin/matlab:*)"
+    ]
+  }
+}

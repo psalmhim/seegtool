@@ -1,0 +1,29 @@
+\section*{Current Results Summary}
+
+\subsection*{What Claude appears to have done}
+
+Based on \texttt{CLAUDE.md}, the recent work was primarily pipeline construction and stabilization rather than generation of final scientific outputs. The documented work describes a resumable 18-stage MATLAB pipeline for SEEG population-dynamics analysis, centered on subject \texttt{EP01AN96M1047}, with support for BIDS loading, preprocessing, event-locked epoching, quality control, ERP analysis, time--frequency analysis, latent trajectory modeling, dynamical systems analysis, decoding, contrast analysis, ROI analysis, bootstrap uncertainty estimation, and publication-figure generation.
+
+The handoff also documents several implementation fixes made in March 2026. These include a switch from per-epoch wavelet transforms to continuous CWT followed by epoching, NaN-safe normalization and PCA/decoding, cluster-corrected condition-separation statistics, improved loading of nested stage-file fields, expanded contrast analysis support, and configuration changes such as 10 latent dimensions, 10~ms smoothing, and 1000 permutations. In short, the recorded work is consistent with a substantial codebase build-out and debugging pass.
+
+\subsection*{What results are actually present in this checkout}
+
+The local repository does not currently contain the stage-wise pipeline outputs described in the handoff. The \texttt{results/} directory exists, but its subdirectories are effectively empty in this checkout, and there are no local \texttt{stageXX\_*.mat} files, summary files, or figure exports. The separate \texttt{data/results/} directory is also empty.
+
+As a result, the current checkout appears to contain code, documentation, and a small number of metadata/result-adjacent JSON files, but not the full analysis outputs that would be needed to summarize ERP, latent trajectory, decoding, or statistical findings from the subject.
+
+\subsection*{Concrete result artifacts that are present}
+
+The main machine-generated result currently available in-repo is \texttt{code/pycode/trigger\_report.json}. This file summarizes trigger alignment checks across 11 runs. Of these, 10 runs are marked \texttt{ok} and 1 run is marked \texttt{correctable}. The companion file \texttt{code/pycode/segment\_info.json} contains extracted task timing windows for the same 11 runs.
+
+\subsection*{Trigger alignment summary}
+
+Overall trigger matching looks good for most runs. Trial counts match between SEEG and PsychoPy for 10 of 11 runs, inter-trial-interval correlations are consistently very high, and most maximum residual errors are on the order of roughly 9--15~ms.
+
+The main exception is \texttt{ses-task08/viseme/run-03}, which is marked \texttt{correctable}. That run has 137 detected SEEG stimulation events versus 140 PsychoPy trials, includes two bunched trigger regions, uses a partial fit (\texttt{partial\_66\_of\_133}), and is therefore not as cleanly aligned as the other runs.
+
+Another point that deserves caution is \texttt{ses-task10/visualrhythm/run-02}. It is still labeled \texttt{ok}, but its maximum residual is approximately 104.4~ms, which is much larger than the rest of the runs. That suggests the run passed the current automatic criteria but should still be manually reviewed before it is treated as equally reliable.
+
+\subsection*{Bottom line}
+
+The current state is best described as follows: Claude appears to have produced and documented a fairly complete SEEG analysis pipeline, plus trigger-validation metadata for 11 runs, but the local checkout does not include the downstream stage outputs or figures needed to summarize the actual neuroscience results. The only directly inspectable results in this repository right now are the trigger-alignment and segment-window summaries, which indicate mostly successful event synchronization with one clearly correctable run and one run that is nominally acceptable but unusually high in residual timing error.

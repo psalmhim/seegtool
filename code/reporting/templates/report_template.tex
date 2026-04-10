@@ -1,0 +1,185 @@
+\documentclass[10pt, letterpaper]{article}
+\usepackage[margin=0.85in]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath, amssymb}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{helvet}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{longtable}
+\renewcommand{\familydefault}{\sfdefault}
+
+\definecolor{sigcolor}{RGB}{215, 38, 38}
+\definecolor{sigbg}{RGB}{255, 235, 235}
+\definecolor{nosigcolor}{RGB}{120, 120, 120}
+\definecolor{accentblue}{RGB}{0, 114, 189}
+\definecolor{keybg}{RGB}{240, 248, 255}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=accentblue,
+    urlcolor=accentblue
+}
+
+\captionsetup{font=small, labelfont=bf, skip=4pt}
+
+\title{%
+    \vspace{-1cm}
+    {\Large SEEG Population Dynamics Analysis}\\[0.5em]
+    {\large Condition-Dependent Neural Dynamics Report}\\[0.3em]
+    {\normalsize Subject: \texttt{%%SUBJECT_ID%%}}
+}
+\author{Automated Analysis Pipeline --- SEEGring v1.0}
+\date{%%DATE%%}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This report presents a comprehensive analysis of condition-dependent neural dynamics
+using stereoelectroencephalography (SEEG) recordings from subject \texttt{%%SUBJECT_ID%%}.
+The analysis spans \textbf{%%N_TASKS%% cognitive tasks} (%%N_RUNS%% total runs)
+recorded with %%N_CHANNELS%% SEEG channels at %%FS%%~Hz.
+All analyses are designed to identify and characterize \textcolor{sigcolor}{\textbf{where and when
+neural population dynamics differ across experimental conditions}}.
+Statistical significance is assessed via cluster-based permutation tests
+($\alpha$ = %%ALPHA%%, %%N_PERMS%% permutations) and reported throughout.
+\end{abstract}
+
+\begin{tcolorbox}[colback=sigbg, colframe=sigcolor, title={\textbf{Key Finding: Condition-Dependent Significance}}]
+%%KEY_FINDING_BOX%%
+\end{tcolorbox}
+
+\tableofcontents
+\newpage
+
+%% ======================================================================
+\section{Data Summary}
+%% ======================================================================
+
+\begin{table}[H]
+\centering
+\caption{Dataset overview for subject \texttt{%%SUBJECT_ID%%}.
+Rows in \textcolor{sigcolor}{red} indicate tasks with statistically significant
+condition separation ($p < %%ALPHA%%$, cluster-corrected).}
+\begin{tabular}{@{}llrrl@{}}
+\toprule
+Session & Task & Trials & Conditions & Status \\
+\midrule
+%%TASK_TABLE_ROWS%%
+\bottomrule
+\end{tabular}
+\label{tab:overview}
+\end{table}
+
+%% ======================================================================
+\section{Methods}
+%% ======================================================================
+
+\subsection{Signal Preprocessing}
+Signals were preprocessed with: (1) %%HIGHPASS%%--%%LOWPASS%%~Hz bandpass filtering
+(Butterworth, order 4); (2) line noise removal at %%LINE_NOISE%%~Hz and harmonics
+via notch filtering; (3) bipolar re-referencing within electrode shafts to maximize
+local field potential specificity and minimize common-mode noise.
+Bad channels identified via BIDS \texttt{channels.tsv} metadata were excluded
+prior to analysis.
+
+\subsection{Epoch Extraction \& Quality Control}
+Epochs were time-locked to stimulus onset (%%EPOCH_PRE%%~s pre to %%EPOCH_POST%%~s post).
+Trials received traffic-light quality labels (green/yellow/red) based on composite metrics
+(RMS amplitude, variance, kurtosis, peak-to-peak). Only green and yellow trials
+contributed to analyses, with quality-based weighting.
+
+\subsection{Time-Frequency Decomposition}
+Time-frequency representations were computed using Morlet wavelets
+(%%TF_CYCLES%% mean cycles, linearly scaled with frequency).
+Power was baseline-normalized (%%BASELINE_METHOD%% method) relative to the
+pre-stimulus window (%%EPOCH_PRE%%~s to 0~s).
+
+\subsection{Population Dynamics \& Latent Space}
+Population activity tensors (trials $\times$ channels $\times$ time) were
+z-scored and reduced to %%N_LATENT_DIMS%% latent dimensions via PCA.
+Condition-averaged trajectories were smoothed with a %%SMOOTH_MS%%~ms Gaussian kernel.
+Trajectory geometry (path length, curvature, tangent angles) and dynamical systems
+properties (jPCA rotational dynamics) characterized temporal evolution.
+
+\subsection{Condition Discrimination}
+\textbf{Condition-dependent changes} were assessed through multiple complementary approaches:
+\begin{enumerate}[nosep]
+    \item \textbf{Cluster-based permutation tests} (%%N_PERMS%% permutations, $\alpha$ = %%ALPHA%%)
+          on ERP, time-frequency, and latent space measures
+    \item \textbf{Time-resolved condition separation index}: Mahalanobis-like distance between
+          condition centroids in latent space, with significance assessed via permutation
+    \item \textbf{Neural decoding}: LDA classifier with stratified %%N_FOLDS%%-fold
+          cross-validation, providing time-resolved classification accuracy
+    \item \textbf{Bootstrap confidence intervals}: 500 bootstrap resamples for
+          trajectory uncertainty quantification; non-overlapping CIs indicate condition divergence
+\end{enumerate}
+
+\noindent
+\textcolor{sigcolor}{\textbf{Throughout this report, significant condition-dependent effects
+are highlighted}} with pink background shading in temporal plots, contour overlays
+in time-frequency maps, bold/colored entries in tables, and dedicated significance panels.
+
+%% ======================================================================
+\section{Results by Task}
+%% ======================================================================
+
+%%PER_TASK_SECTIONS%%
+
+%% ======================================================================
+\section{Condition-Dependent Significance Summary}
+%% ======================================================================
+
+\begin{tcolorbox}[colback=keybg, colframe=accentblue, title={\textbf{Cross-Task Condition Discrimination}}]
+%%CROSS_TASK_TEXT%%
+\end{tcolorbox}
+
+\begin{table}[H]
+\centering
+\caption{Condition discrimination metrics across all tasks.
+\textcolor{sigcolor}{\textbf{Bold red}} entries indicate statistically significant
+condition separation ($p < %%ALPHA%%$, cluster-corrected).
+Stars: ${}^{*}p<0.05$, ${}^{**}p<0.01$, ${}^{***}p<0.001$.}
+\begin{tabular}{@{}l r r r r r r@{}}
+\toprule
+Task & Peak Sep. & $p_{\min}$ & Peak Acc. (\%) & Onset (ms) & Eff. Dim. & jPCA $R^2$ \\
+\midrule
+%%CROSS_TASK_TABLE_ROWS%%
+\bottomrule
+\end{tabular}
+\label{tab:significance}
+\end{table}
+
+%%SIGNIFICANCE_TIMELINE%%
+
+%% ======================================================================
+\section{Significance Interpretation}
+%% ======================================================================
+
+%%INTERPRETATION_TEXT%%
+
+\subsection{Methodological Notes}
+\begin{itemize}[nosep]
+    \item All p-values are corrected for multiple comparisons using cluster-based
+          permutation testing (%%N_PERMS%% permutations)
+    \item Significance thresholds: ${}^{*}p<0.05$, ${}^{**}p<0.01$, ${}^{***}p<0.001$
+    \item Decoding onset defined as first time point exceeding chance level at $p < 0.05$
+    \item Condition separation index computed in %%N_LATENT_DIMS%%-dimensional latent space
+    \item Effective dimensionality estimated via participation ratio of eigenvalue spectrum
+\end{itemize}
+
+\section*{Acknowledgements}
+\small
+Analysis performed using the SEEGring population dynamics toolbox.
+Figures generated with Nature-journal-quality visualization system
+(Wong 2011 colorblind-safe palette, Helvetica 5--7pt, 600 DPI).
+
+\end{document}

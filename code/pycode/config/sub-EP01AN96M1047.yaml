@@ -1,0 +1,419 @@
+# BIDS Configuration for Patient sub-EP01AN96M1047
+# YUHS SEEG Cognitive Task Study
+# Generated: 2026-03-14
+# Updated: 2026-03-15 (v2 schema with annotation_scheme, trial_grouping, etc.)
+
+participant_id: "sub-EP01AN96M1047"
+demographics:
+  age: 29
+  sex: "M"
+  handedness: "R"
+  pathology: "drug-resistant epilepsy"
+
+# Pipeline control
+pipeline:
+  steps: ["scaffold", "split_edf", "sidecars", "events", "copy_anat", "readmes", "validate"]
+  incremental: false
+
+# Modality selection
+modalities_include:
+  anat: true
+  dwi: true
+  func: true
+  pet: true
+  ieeg: true
+  derivatives: true
+
+# Seizure onset zone (researcher-provided)
+soz:
+  electrodes: []
+  description: ""
+  determination_method: "clinical consensus from SEEG monitoring"
+
+# EDF annotation → standard event type mapping
+event_type_mapping:
+  fixation: "fixation"
+  stimuli: "stimulus"
+  stim_on: "stimulus"
+  stim_off: "stimulus_offset"
+  response: "response"
+  isi: "isi"
+  probe: "probe"
+
+# Task descriptions for ieeg.json sidecar
+task_descriptions:
+  lexicaldecision: "Visual word/nonword discrimination task. Patient views an image showing a word or nonword and presses A (left) or L (right) to categorize."
+  shapecontrol: "Shape matching control task. Patient views geometric shapes and presses A or L to indicate if the shapes match. Non-linguistic control for lexical decision tasks."
+  sentencenoun: "Sentence-noun semantic judgment task. Patient reads a sentence and noun image, then judges if the noun is semantically congruent with the sentence."
+  sentencegrammar: "Sentence grammaticality judgment task. Patient reads a sentence and judges whether it is grammatically correct or incorrect."
+  saliencepain: "Passive viewing of pain-related images. Patient views images depicting painful or neutral scenes with no response required."
+  balloonwatching: "Passive viewing of balloon inflation videos. Patient watches videos of balloons being inflated with no response required."
+  viseme: "Visual speech perception 2-alternative forced choice task. Patient watches a video of a talker producing a viseme and selects the matching syllable from two options."
+  visemegen: "Visual speech generalization 2-AFC task. Same paradigm as viseme task but with a novel talker (kjj) to test generalization of visual speech learning."
+  visualrhythm: "Passive viewing of lip rhythm videos. Patient watches videos of lip movements with varying rhythmic properties."
+
+# EDF annotation schemes (per EDF file)
+edf_annotation_schemes:
+  "260311/STUDY001.EDF":
+    mode: "sequential"
+    start_label: "task_start"
+    end_label: "task_end"
+    task_order:
+      - {ses: "ses-task05", bids_task: "saliencepain", run: 1}
+      - {ses: "ses-task06", bids_task: "balloonwatching", run: 1}
+      - {ses: "ses-task01", bids_task: "lexicaldecision", run: 1}
+      - {ses: "ses-task03", bids_task: "sentencenoun", run: 1}
+      - {ses: "ses-task02", bids_task: "shapecontrol", run: 1}
+      - {ses: "ses-task04", bids_task: "sentencegrammar", run: 1}
+
+  "260312/STUDY002.EDF":
+    mode: "labeled"
+    start_labels: ["task_start_esk_b1", "task_start_esk_b2"]
+    end_label: "task_end"
+    skip_labels: ["task_start_prac", "start"]
+    task_mapping:
+      task_start_esk_b1: {ses: "ses-task08", bids_task: "viseme", run: 1}
+      task_start_esk_b2: {ses: "ses-task08", bids_task: "viseme", run: 2}
+
+  "260312/STUDY003.EDF":
+    mode: "labeled"
+    start_labels: ["task_start_kjj_b1"]
+    end_label: "task_end"
+    skip_labels: ["task_start_prac"]
+    task_mapping:
+      task_start_kjj_b1: {ses: "ses-task08", bids_task: "visemegen", run: 1}
+
+  "260313/STUDY004.EDF":
+    mode: "labeled"
+    start_labels: ["task_start_esk_b3", "task_rhy_ses12_start"]
+    end_label: "task_end"
+    skip_labels: ["task_start_prac", "task_rhy_prac_start"]
+    task_mapping:
+      task_start_esk_b3: {ses: "ses-task08", bids_task: "viseme", run: 3}
+      task_rhy_ses12_start:
+        ses: "ses-task10"
+        bids_task: "visualrhythm"
+        run_start: 1  # first occurrence gets run=1, second gets run=2, etc.
+        auto_increment: true
+
+seeg:
+  sampling_rate: 2048
+  manufacturer: "Natus"
+  manufacturer_model: "XLTEK"
+  reference: "white matter"
+  power_line_frequency: 60
+  electrode_file: "psychopy_patient/BIDS/sub-001/elec/elec.tsv"
+  coordinate_system: "Other"
+  coordinate_system_description: "Native T1w MRI space, post-implant CT co-registered to pre-op T1w"
+  coordinate_units: "mm"
+
+# Raw data paths (relative to /remotenas2/YUHS/SEEG_PSYCHOPY/)
+raw_data_root: "/remotenas2/YUHS/SEEG_PSYCHOPY"
+
+# Neuroimaging data sources
+neuroimaging:
+  preop:
+    date: "2026-03-06"
+    T1w: "psychopy_patient/RAW/sub-001/4605773_preOP-T13D/201_3D_SAG.nii.gz"
+    T1w_json: "psychopy_patient/BIDS/sub-001/anat/T1.json"
+    FLAIR: "psychopy_patient/RAW/sub-001/4605773_preOP-DTI/3_3D_Brain_View_FLAIR_SAG.nii.gz"
+    dwi: "psychopy_patient/RAW/sub-001/4605773_preOP-DTI/6_DTI_32DIR_B0_1000.nii.gz"
+    dwi_bval: "psychopy_patient/BIDS/sub-001/dwi/DTI.bval"
+    dwi_bvec: "psychopy_patient/BIDS/sub-001/dwi/DTI.bvec"
+    dwi_json: "psychopy_patient/BIDS/sub-001/dwi/DTI.json"
+    func_rest: "psychopy_patient/RAW/sub-001/4605773_preOP-DTI/5_fMRI_REST_165.nii.gz"
+    pet: "psychopy_patient/RAW/sub-001/4605773_preOP-PET/656_PET_co.nii.gz"
+  postimplant:
+    date: "2026-03-08"
+    CT: "psychopy_patient/RAW/sub-001/4605773_postSEEG-CT/1_CT_Brain_Grid_3D_(noncontrast).nii.gz"
+    T1w: "psychopy_patient/RAW/sub-001/4605773_postSEEG-T13D/301_3D_SAG.nii.gz"
+    FLAIR: "psychopy_patient/RAW/sub-001/4605773_postSEEG-DTI/4_3D_Brain_View_FLAIR_SAG.nii.gz"
+    dwi: "psychopy_patient/RAW/sub-001/4605773_postSEEG-DTI/7_DTI_32DIR_B0_1000.nii.gz"
+    func_rest: "psychopy_patient/RAW/sub-001/4605773_postSEEG-DTI/6_fMRI_REST_165.nii.gz"
+
+# Derivatives sources
+derivatives:
+  freesurfer: "psychopy_patient/BIDS/sub-001/freesurfer"
+  tractography: "psychopy_patient/BIDS/sub-001/tractography"
+  electrode_localization:
+    elec_tsv: "psychopy_patient/BIDS/sub-001/elec/elec.tsv"
+    elec_mat: "psychopy_patient/BIDS/sub-001/elec/elec.mat"
+    elec_txt: "psychopy_patient/BIDS/sub-001/elec/elec.txt"
+    CT: "psychopy_patient/BIDS/sub-001/elec/CT.nii.gz"
+    CT_05: "psychopy_patient/BIDS/sub-001/elec/CT_0p5.nii.gz"
+
+# Session definitions
+sessions:
+  ses-preop:
+    date: "2026-03-06"
+    context: "preoperative"
+    purpose: "Presurgical MRI workup"
+    modalities: ["anat", "dwi", "func", "pet"]
+
+  ses-postimplant:
+    date: "2026-03-08"
+    context: "postimplant"
+    purpose: "Post-SEEG electrode implantation CT and MRI"
+    modalities: ["anat", "dwi", "func"]
+
+  ses-task01:
+    date: "2026-03-11"
+    context: "monitoring"
+    purpose: "Task01 Lexical Decision Task"
+    modalities: ["ieeg"]
+    edf_files: ["260311/STUDY001.EDF"]
+    event_csv: "260311/cys_day01_20260311_seeg_event.csv"
+    tasks:
+      - bids_task: "lexicaldecision"
+        run: 1
+        task_name: "Lexical Decision Task"
+        has_response: true
+        trial_grouping:
+          trigger_event: "fixation"
+          required_events: ["stimulus"]
+          optional_events: ["response"]
+        n_expected_trials: 100
+        behavior_csv: "260311/Task01_LDT/data/154526tt_run_Task_LDT_2026-03-11_16h02.38.972.csv"
+        psychopy_onset_col: "img_words.started"
+        psychopy_thisN_col: "trials.thisN"
+        stim_columns: ["num", "img_file", "direction", "correct_ans"]
+        response_key_col: "key_resp_words.keys"
+        response_corr_col: "key_resp_words.corr"
+        response_rt_col: "key_resp_words.rt"
+
+  ses-task02:
+    date: "2026-03-11"
+    context: "monitoring"
+    purpose: "Task02 Shape Control Task"
+    modalities: ["ieeg"]
+    edf_files: ["260311/STUDY001.EDF"]
+    event_csv: "260311/cys_day01_20260311_seeg_event.csv"
+    tasks:
+      - bids_task: "shapecontrol"
+        run: 1
+        task_name: "Shape Control Task"
+        has_response: true
+        trial_grouping:
+          trigger_event: "fixation"
+          required_events: ["stimulus"]
+          optional_events: ["response"]
+        n_expected_trials: 100
+        behavior_csv: "260311/Task02_LDT_cont_Shape/data/ysc1_run_Task_LDT_2026-03-11_16h18.22.028.csv"
+        psychopy_onset_col: "img_shapes.started"
+        psychopy_thisN_col: "trials.thisN"
+        stim_columns: ["num", "img_file", "direction", "correct_ans", "match_shape", "diff_shape", "diff_pos", "left_shape1", "left_shape2", "right_shape1", "right_shape2"]
+        response_key_col: "key_resp_shapes.keys"
+        response_corr_col: "key_resp_shapes.corr"
+        response_rt_col: "key_resp_shapes.rt"
+
+  ses-task03:
+    date: "2026-03-11"
+    context: "monitoring"
+    purpose: "Task03 Sentence-Noun Semantic Task"
+    modalities: ["ieeg"]
+    edf_files: ["260311/STUDY001.EDF"]
+    event_csv: "260311/cys_day01_20260311_seeg_event.csv"
+    tasks:
+      - bids_task: "sentencenoun"
+        run: 1
+        task_name: "Sentence-Noun Semantic Task"
+        has_response: true
+        trial_grouping:
+          trigger_event: "fixation"
+          required_events: ["stimulus"]
+          optional_events: ["response"]
+        n_expected_trials: 120
+        behavior_csv: "260311/Task03_LDT_SN/data/ysc1_run_Task_LDT_2026-03-11_16h08.57.675.csv"
+        psychopy_onset_col: "img_words.started"
+        psychopy_thisN_col: "trials.thisN"
+        stim_columns: ["num", "img_file", "direction", "correct_ans", "LT", "RT"]
+        response_key_col: "key_resp_words.keys"
+        response_corr_col: "key_resp_words.corr"
+        response_rt_col: "key_resp_words.rt"
+
+  ses-task04:
+    date: "2026-03-11"
+    context: "monitoring"
+    purpose: "Task04 Sentence Grammar Task"
+    modalities: ["ieeg"]
+    edf_files: ["260311/STUDY001.EDF"]
+    event_csv: "260311/cys_day01_20260311_seeg_event.csv"
+    tasks:
+      - bids_task: "sentencegrammar"
+        run: 1
+        task_name: "Sentence Grammar Task"
+        has_response: true
+        trial_grouping:
+          trigger_event: "fixation"
+          required_events: ["stimulus"]
+          optional_events: ["response"]
+        n_expected_trials: 120
+        behavior_csv: "260311/Task04_LDT_SG/data/ysc1_run_Task_LDT_2026-03-11_16h25.41.564.csv"
+        psychopy_onset_col: "img_words.started"
+        psychopy_thisN_col: "trials.thisN"
+        stim_columns: ["num", "img_file", "direction", "correct_ans", "LT", "RT"]
+        response_key_col: "key_resp_words.keys"
+        response_corr_col: "key_resp_words.corr"
+        response_rt_col: "key_resp_words.rt"
+
+  ses-task05:
+    date: "2026-03-11"
+    context: "monitoring"
+    purpose: "Task05 Salience Pain (Passive Viewing)"
+    modalities: ["ieeg"]
+    edf_files: ["260311/STUDY001.EDF"]
+    event_csv: "260311/cys_day01_20260311_seeg_event.csv"
+    tasks:
+      - bids_task: "saliencepain"
+        run: 1
+        task_name: "Salience Pain (Passive Viewing)"
+        has_response: false
+        trial_grouping:
+          trigger_event: "fixation"
+          required_events: ["stimulus"]
+          optional_events: []
+        n_expected_trials: 60
+        behavior_csv: "260311/Task05_Salience_Pain/data/ysc1_Salience_pain_pic_sEEG_ver1.0_DCtrg_2026-03-11_15h47.30.644.csv"
+        psychopy_onset_col: "image_Pain.started"
+        psychopy_thisN_col: "trials.thisN"
+        stim_columns: ["imgList", "Pain"]
+        response_key_col: null
+        response_corr_col: null
+        response_rt_col: null
+
+  ses-task06:
+    date: "2026-03-11"
+    context: "monitoring"
+    purpose: "Task06 Balloon Watching (Passive Viewing)"
+    modalities: ["ieeg"]
+    edf_files: ["260311/STUDY001.EDF"]
+    event_csv: "260311/cys_day01_20260311_seeg_event.csv"
+    tasks:
+      - bids_task: "balloonwatching"
+        run: 1
+        task_name: "Balloon Watching (Passive Viewing)"
+        has_response: false
+        trial_grouping:
+          trigger_event: "stimulus"
+          required_events: ["fixation"]
+          optional_events: []
+        n_expected_trials: 10
+        behavior_csv: "260311/Task06_Balloon_watching/data/ysc1_balloon_watching_2026-03-11_15h54.14.023.csv"
+        psychopy_onset_col: "movie_balloon.started"
+        psychopy_thisN_col: "trials.thisN"
+        stim_columns: ["videos", "condition", "duration"]
+        response_key_col: null
+        response_corr_col: null
+        response_rt_col: null
+
+  ses-task08:
+    date: "2026-03-12~13"
+    context: "monitoring"
+    purpose: "Task08 Viseme (Visual Speech Perception 2-AFC)"
+    modalities: ["ieeg"]
+    edf_files:
+      - "260312/STUDY002.EDF"
+      - "260312/STUDY003.EDF"
+      - "260313/STUDY004.EDF"
+    event_csv: null  # Day 2/3 event CSVs to be extracted via MNE
+    tasks:
+      - bids_task: "viseme"
+        run: 1
+        task_name: "Viseme Block esk_01"
+        has_response: true
+        trial_grouping:
+          trigger_event: "fixation"
+          required_events: ["stimulus"]
+          optional_events: ["stimulus_offset", "response"]
+        n_expected_trials: 140
+        behavior_csv: "260312/Task08_VISEME/data/ysc1_Task_Viseme_block_esk_01_2026-03-12_13h32.30.205.csv"
+        psychopy_onset_col: "movie_viseme.started"
+        psychopy_thisN_col: "block01.thisN"
+        stim_columns: ["trial_num", "video_file", "viseme_id", "viseme_category", "viseme_hangul", "viseme_cluster", "stimulus_type", "foil_id", "foil_category", "foil_hangul", "foil_cluster", "foil_type", "correct_position", "correct_key", "trigger_code"]
+        response_key_col: "key_resp_trial.keys"
+        response_corr_col: "key_resp_trial.corr"
+        response_rt_col: "key_resp_trial.rt"
+      - bids_task: "viseme"
+        run: 2
+        task_name: "Viseme Block esk_02"
+        has_response: true
+        trial_grouping:
+          trigger_event: "fixation"
+          required_events: ["stimulus"]
+          optional_events: ["stimulus_offset", "response"]
+        n_expected_trials: 140
+        behavior_csv: "260312/Task08_VISEME/data/cys_Task_Viseme_block_esk_02_2026-03-12_13h55.06.362.csv"
+        psychopy_onset_col: "movie_viseme.started"
+        psychopy_thisN_col: "block01.thisN"
+        stim_columns: ["trial_num", "video_file", "viseme_id", "viseme_category", "viseme_hangul", "viseme_cluster", "stimulus_type", "foil_id", "foil_category", "foil_hangul", "foil_cluster", "foil_type", "correct_position", "correct_key", "trigger_code"]
+        response_key_col: "key_resp_trial.keys"
+        response_corr_col: "key_resp_trial.corr"
+        response_rt_col: "key_resp_trial.rt"
+      - bids_task: "viseme"
+        run: 3
+        task_name: "Viseme Block esk_03"
+        has_response: true
+        trial_grouping:
+          trigger_event: "fixation"
+          required_events: ["stimulus"]
+          optional_events: ["stimulus_offset", "response"]
+        n_expected_trials: 140  # 137 in raw SEEG (3 bunched), 140 after PsychoPy correction
+        behavior_csv: "260312/Task08_VISEME/data/cys_Task_Viseme_block_esk_03_2026-03-13_11h11.21.508.csv"
+        psychopy_onset_col: "movie_viseme.started"
+        psychopy_thisN_col: "block01.thisN"
+        stim_columns: ["trial_num", "video_file", "viseme_id", "viseme_category", "viseme_hangul", "viseme_cluster", "stimulus_type", "foil_id", "foil_category", "foil_hangul", "foil_cluster", "foil_type", "correct_position", "correct_key", "trigger_code"]
+        response_key_col: "key_resp_trial.keys"
+        response_corr_col: "key_resp_trial.corr"
+        response_rt_col: "key_resp_trial.rt"
+      - bids_task: "visemegen"
+        run: 1
+        task_name: "Viseme Generalization Block kjj_01"
+        has_response: true
+        trial_grouping:
+          trigger_event: "fixation"
+          required_events: ["stimulus"]
+          optional_events: ["stimulus_offset", "response"]
+        n_expected_trials: 126
+        behavior_csv: "260312/Task08_VISEME/data/cys_Task_Viseme_block_kjj_01_2026-03-12_17h45.53.973.csv"
+        psychopy_onset_col: "movie_viseme.started"
+        psychopy_thisN_col: "block01.thisN"
+        stim_columns: ["trial_num", "video_file", "viseme_id", "viseme_category", "viseme_hangul", "viseme_cluster", "stimulus_type", "foil_id", "foil_category", "foil_hangul", "foil_cluster", "foil_type", "correct_position", "correct_key", "trigger_code"]
+        response_key_col: "key_resp_trial.keys"
+        response_corr_col: "key_resp_trial.corr"
+        response_rt_col: "key_resp_trial.rt"
+
+  ses-task10:
+    date: "2026-03-13"
+    context: "monitoring"
+    purpose: "Task10 Visual Rhythm (Passive Viewing)"
+    modalities: ["ieeg"]
+    edf_files: ["260313/STUDY004.EDF"]
+    event_csv: null
+    tasks:
+      - bids_task: "visualrhythm"
+        run: 1
+        exclude: true
+        exclude_reason: "PsychoPy 중단 - 방해 요소 과다"
+        task_name: "Visual Rhythm (Session 01+02, interrupted)"
+        has_response: false
+        trial_grouping:
+          trigger_event: "fixation"
+          required_events: ["stimulus"]
+          optional_events: ["stimulus_offset", "isi", "probe"]
+        n_expected_trials: 0
+      - bids_task: "visualrhythm"
+        run: 2
+        task_name: "Visual Rhythm (Session 01+02, re-run)"
+        has_response: false
+        trial_grouping:
+          trigger_event: "fixation"
+          required_events: ["stimulus"]
+          optional_events: ["stimulus_offset", "isi", "probe"]
+        n_expected_trials: 80
+        behavior_csv: "260313/Task10_LIPTASK_SIZE_psychopy/data/cys_re12_Task_Rhythm_SIZE_session_01_02_2026-03-13_11h54.24.805.csv"
+        psychopy_onset_col: "movie_stim.started"
+        psychopy_thisN_col: "trials.thisN"
+        stim_columns: ["trial_num", "session", "ses_num", "condition", "condition_name", "video_id", "video_file", "video_duration", "trigger_code"]
+        response_key_col: null
+        response_corr_col: null
+        response_rt_col: null

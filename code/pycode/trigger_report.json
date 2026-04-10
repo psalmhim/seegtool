@@ -1,0 +1,257 @@
+{
+  "generated": "2026-03-16T14:39:42.688315",
+  "patient": "sub-EP01AN96M1047",
+  "auto_correct": false,
+  "runs": {
+    "ses-task01/lexicaldecision/run-01": {
+      "seeg_stim_count": 100,
+      "psychopy_trial_count": 100,
+      "bunched_regions": [],
+      "count_match": true,
+      "iti_correlation": 0.9995177115662964,
+      "max_residual_ms": 10.198206999120885,
+      "drift_ppm": -3.9044692156098293,
+      "alignment": {
+        "trial_offset": 0,
+        "iti_correlation": 0.9995177115662964,
+        "slope": 0.9999960955307844,
+        "intercept": 1574.9949309358208,
+        "drift_ppm": -3.9044692156098293,
+        "residual_std_ms": 5.275027773036784,
+        "residual_max_ms": 10.198206999120885,
+        "n_matched": 100,
+        "fit_method": "full"
+      },
+      "status": "ok",
+      "correction_needed": false
+    },
+    "ses-task02/shapecontrol/run-01": {
+      "seeg_stim_count": 100,
+      "psychopy_trial_count": 100,
+      "bunched_regions": [],
+      "count_match": true,
+      "iti_correlation": 0.9993687818016399,
+      "max_residual_ms": 10.522191362724698,
+      "drift_ppm": -6.33303658070794,
+      "alignment": {
+        "trial_offset": 0,
+        "iti_correlation": 0.9993687818016399,
+        "slope": 0.9999936669634193,
+        "intercept": 2517.9651580579116,
+        "drift_ppm": -6.33303658070794,
+        "residual_std_ms": 5.169177584232462,
+        "residual_max_ms": 10.522191362724698,
+        "n_matched": 100,
+        "fit_method": "full"
+      },
+      "status": "ok",
+      "correction_needed": false
+    },
+    "ses-task03/sentencenoun/run-01": {
+      "seeg_stim_count": 120,
+      "psychopy_trial_count": 120,
+      "bunched_regions": [],
+      "count_match": true,
+      "iti_correlation": 0.9987852696999044,
+      "max_residual_ms": 11.21474020419555,
+      "drift_ppm": -1.1517147812112327,
+      "alignment": {
+        "trial_offset": 0,
+        "iti_correlation": 0.9987852696999044,
+        "slope": 0.9999988482852188,
+        "intercept": 1953.6815308626524,
+        "drift_ppm": -1.1517147812112327,
+        "residual_std_ms": 5.488933762780708,
+        "residual_max_ms": 11.21474020419555,
+        "n_matched": 120,
+        "fit_method": "full"
+      },
+      "status": "ok",
+      "correction_needed": false
+    },
+    "ses-task04/sentencegrammar/run-01": {
+      "seeg_stim_count": 120,
+      "psychopy_trial_count": 120,
+      "bunched_regions": [],
+      "count_match": true,
+      "iti_correlation": 0.9991150801607829,
+      "max_residual_ms": 11.114066700429248,
+      "drift_ppm": -3.25663818967481,
+      "alignment": {
+        "trial_offset": 0,
+        "iti_correlation": 0.9991150801607829,
+        "slope": 0.9999967433618103,
+        "intercept": 2958.5317014220113,
+        "drift_ppm": -3.25663818967481,
+        "residual_std_ms": 5.364551320586499,
+        "residual_max_ms": 11.114066700429248,
+        "n_matched": 120,
+        "fit_method": "full"
+      },
+      "status": "ok",
+      "correction_needed": false
+    },
+    "ses-task05/saliencepain/run-01": {
+      "seeg_stim_count": 60,
+      "psychopy_trial_count": 60,
+      "bunched_regions": [],
+      "count_match": true,
+      "iti_correlation": 0.9998668653817422,
+      "max_residual_ms": 14.467670701606039,
+      "drift_ppm": 1.4037560098767443,
+      "alignment": {
+        "trial_offset": 0,
+        "iti_correlation": 0.9998668653817422,
+        "slope": 1.0000014037560099,
+        "intercept": 663.8244265889294,
+        "drift_ppm": 1.4037560098767443,
+        "residual_std_ms": 6.10940209472987,
+        "residual_max_ms": 14.467670701606039,
+        "n_matched": 60,
+        "fit_method": "full"
+      },
+      "status": "ok",
+      "correction_needed": false
+    },
+    "ses-task06/balloonwatching/run-01": {
+      "seeg_stim_count": 10,
+      "psychopy_trial_count": 10,
+      "bunched_regions": [],
+      "count_match": true,
+      "iti_correlation": 0.9998994773330072,
+      "max_residual_ms": 8.879370854629087,
+      "drift_ppm": 25.83525212984661,
+      "alignment": {
+        "trial_offset": 0,
+        "iti_correlation": 0.9998994773330072,
+        "slope": 1.0000258352521298,
+        "intercept": 1068.4767293975033,
+        "drift_ppm": 25.83525212984661,
+        "residual_std_ms": 5.283741911203108,
+        "residual_max_ms": 8.879370854629087,
+        "n_matched": 10,
+        "fit_method": "full"
+      },
+      "status": "ok",
+      "correction_needed": false
+    },
+    "ses-task08/viseme/run-01": {
+      "seeg_stim_count": 140,
+      "psychopy_trial_count": 140,
+      "bunched_regions": [],
+      "count_match": true,
+      "iti_correlation": 0.9995267945807043,
+      "max_residual_ms": 12.360208140194118,
+      "drift_ppm": -5.418073043661487,
+      "alignment": {
+        "trial_offset": 0,
+        "iti_correlation": 0.9995267945807043,
+        "slope": 0.9999945819269563,
+        "intercept": 227.4195892869227,
+        "drift_ppm": -5.418073043661487,
+        "residual_std_ms": 5.674992095273451,
+        "residual_max_ms": 12.360208140194118,
+        "n_matched": 140,
+        "fit_method": "full"
+      },
+      "status": "ok",
+      "correction_needed": false
+    },
+    "ses-task08/viseme/run-02": {
+      "seeg_stim_count": 140,
+      "psychopy_trial_count": 140,
+      "bunched_regions": [],
+      "count_match": true,
+      "iti_correlation": 0.9997066139438299,
+      "max_residual_ms": 11.5818485296586,
+      "drift_ppm": -3.538660678814587,
+      "alignment": {
+        "trial_offset": 0,
+        "iti_correlation": 0.9997066139438299,
+        "slope": 0.9999964613393212,
+        "intercept": 1552.9237138796832,
+        "drift_ppm": -3.538660678814587,
+        "residual_std_ms": 5.5634592558905185,
+        "residual_max_ms": 11.5818485296586,
+        "n_matched": 140,
+        "fit_method": "full"
+      },
+      "status": "ok",
+      "correction_needed": false
+    },
+    "ses-task08/viseme/run-03": {
+      "seeg_stim_count": 137,
+      "psychopy_trial_count": 140,
+      "bunched_regions": [
+        {
+          "timestamp": 263.586,
+          "n_events": 8
+        },
+        {
+          "timestamp": 669.7,
+          "n_events": 7
+        }
+      ],
+      "count_match": false,
+      "iti_correlation": 0.9996102542687201,
+      "max_residual_ms": 12.386529876494023,
+      "drift_ppm": -10.245242429651746,
+      "alignment": {
+        "trial_offset": 5,
+        "iti_correlation": 0.9996102542687201,
+        "slope": 0.9999897547575703,
+        "intercept": 233.34022406158994,
+        "drift_ppm": -10.245242429651746,
+        "residual_std_ms": 5.771224713595515,
+        "residual_max_ms": 12.386529876494023,
+        "n_matched": 133,
+        "fit_method": "partial_66_of_133"
+      },
+      "status": "correctable"
+    },
+    "ses-task08/visemegen/run-01": {
+      "seeg_stim_count": 126,
+      "psychopy_trial_count": 126,
+      "bunched_regions": [],
+      "count_match": true,
+      "iti_correlation": 0.9998087422697624,
+      "max_residual_ms": 10.65056346521942,
+      "drift_ppm": -1.3183216857060032,
+      "alignment": {
+        "trial_offset": 0,
+        "iti_correlation": 0.9998087422697624,
+        "slope": 0.9999986816783143,
+        "intercept": 463.3181643240109,
+        "drift_ppm": -1.3183216857060032,
+        "residual_std_ms": 5.4078907512927765,
+        "residual_max_ms": 10.65056346521942,
+        "n_matched": 126,
+        "fit_method": "full"
+      },
+      "status": "ok",
+      "correction_needed": false
+    },
+    "ses-task10/visualrhythm/run-02": {
+      "seeg_stim_count": 80,
+      "psychopy_trial_count": 80,
+      "bunched_regions": [],
+      "count_match": true,
+      "iti_correlation": 0.9994962496554269,
+      "max_residual_ms": 104.41575478671439,
+      "drift_ppm": -7.934409031462586,
+      "alignment": {
+        "trial_offset": 0,
+        "iti_correlation": 0.9994962496554269,
+        "slope": 0.9999920655909685,
+        "intercept": 2811.662319893786,
+        "drift_ppm": -7.934409031462586,
+        "residual_std_ms": 16.99481581270055,
+        "residual_max_ms": 104.41575478671439,
+        "n_matched": 80,
+        "fit_method": "full"
+      },
+      "status": "ok",
+      "correction_needed": false
+    }
+  }
+}

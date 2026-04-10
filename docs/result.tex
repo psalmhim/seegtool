@@ -1,0 +1,128 @@
+\chapter{Results}
+
+\section{Overview}
+
+Results were obtained from the derivative output directory
+\texttt{/Volumes/OHDD/DATA/epilepsy/derivatives/seegring/sub-EP01AN96M1047}.
+Two complementary result summaries were available. First, the batch
+condition-discrimination report generated on 2026-03-24 summarized
+population-level analyses across 9 cognitive tasks and 11 runs.
+Second, a separate channel-significance summary quantified
+channel-by-time cluster significance and decoding-based channel
+importance for a subset of 7 analyzable task runs.
+
+These two summaries support a consistent interpretation. At the
+population latent-space level, no task showed statistically significant
+condition separation after cluster-corrected permutation testing. In
+contrast, at the channel level, several tasks exhibited substantial
+numbers of channels with significant time clusters and robust decoding
+performance, indicating that condition information was present in the
+recordings but was not recovered as a statistically significant
+population-level latent separation under the current analysis settings.
+
+\section{Population-Level Condition Separation}
+
+The cross-task report in
+\texttt{reports/20260324\_171402/report.md} analyzed 9 cognitive tasks
+spanning 11 runs, including lexical decision, shape control, sentence
+noun, sentence grammar, salience pain, balloon watching, viseme
+perception, and viseme generation. Statistical significance was assessed
+with cluster-based permutation tests using 1000 permutations and
+$\alpha=0.05$.
+
+The main result of that report was negative: no task showed
+statistically significant condition-dependent separation at the
+population level. The corresponding summary table
+(\texttt{stats\_summary.csv}) reported \texttt{Sig = NO} for every
+processed task, with peak separation, minimum p-value, peak decoding,
+decoding onset, effective dimensionality, and jPCA summary fields left
+as undefined values. The report therefore does not support any claim of
+significant condition separation in latent space, significant
+condition-dependent temporal windows, or significant cross-condition
+population decoding at the whole-task summary level.
+
+\section{Channel-Level Significant Results}
+
+A separate analysis stored in
+\texttt{channel\_significance\_summary.mat} yielded a different picture
+at the channel level. This analysis re-ran permutation statistics and
+decoding for 7 task runs and computed the number of channels with
+significant channel-by-time clusters. All 7 analyzed tasks showed at
+least some cluster-corrected channel-level significance, although none
+showed region-of-interest significance after false-discovery-rate
+correction.
+
+The strongest channel-level effects were observed for
+\texttt{task-lexicaldecision\_run-01}, which showed 23 channels with
+significant time clusters and a peak decoding accuracy of 92.0\%.
+\texttt{task-shapecontrol\_run-01} showed a similarly strong effect,
+with 22 significant channels and a peak decoding accuracy of 99.0\%.
+Intermediate effects were observed for
+\texttt{task-sentencegrammar\_run-01} and
+\texttt{task-viseme\_run-01}, each with 9 significant channels, and for
+\texttt{task-saliencepain\_run-01} and
+\texttt{task-sentencenoun\_run-01}, each with 7 significant channels.
+\texttt{task-balloonwatching\_run-01} showed 5 significant channels and
+a nominal peak decoding accuracy of 100.0\%, although this result should
+be interpreted cautiously given the very small sample size of 10 trials.
+
+Across these 7 channel-level analyses, the count of ROI-level FDR
+significant channels was zero in every task. Thus, the significant
+effects reported here should be interpreted specifically as
+channel-by-time cluster-corrected findings, not as ROI-level
+FDR-significant contacts. The effects were spatially sparse and
+time-localized rather than strong enough to survive ROI-level
+multiple-comparison correction.
+
+\section{Decoding Results}
+
+The channel-level decoding analysis indicated that binary tasks carried
+considerable condition information despite the absence of significant
+population-level latent separation in the batch report. Peak decoding
+accuracy reached 99.0\% in shape control, 92.0\% in lexical decision,
+75.0\% in salience pain, 68.3\% in sentence grammar, and 65.0\% in
+sentence noun. Balloon watching reached 100.0\%, but this estimate was
+derived from only 10 trials and is therefore likely to be unstable.
+
+By contrast, the multi-class viseme task showed much weaker decoding,
+with a peak accuracy of 16.4\% across 14 classes. Although this is above
+the nominal chance level of approximately 7.1\%, it was accompanied by
+only modest channel-level clustering and was not reflected in a
+significant cross-task population-level result.
+
+\section{Spatial Distribution of Informative Channels}
+
+The most repeatedly prominent channels across tasks were concentrated in
+a relatively stable subset of contacts. Among the top-20 channels ranked
+by decoding contribution, \texttt{PI6}, \texttt{PI7}, \texttt{PI5},
+\texttt{PI4}, \texttt{Ia15}, and \texttt{PI3} each appeared in 6 of the
+7 analyzed tasks. Additional frequently recurring channels included
+\texttt{Ia14} in 5 tasks and \texttt{PI8}, \texttt{PI9}, \texttt{C14},
+\texttt{C13}, \texttt{C12}, \texttt{Ia16}, and \texttt{PI2} in 4 tasks.
+
+This recurrence suggests that a stable subset of electrodes carried much
+of the discriminative signal across paradigms. The recurrent involvement
+of neighboring \texttt{PI}, \texttt{Ia}, and \texttt{C} contacts is more
+consistent with localized informative subspaces than with a broadly
+distributed whole-population separation effect.
+
+\section{Interpretation}
+
+Taken together, the current outputs support a split conclusion. On the
+one hand, the official batch condition-discrimination report provides no
+evidence for statistically significant condition separation at the
+population latent-space level after cluster-corrected testing. On the
+other hand, the dedicated channel-significance analysis shows that
+multiple tasks do contain statistically significant channel-by-time
+effects and practically strong decoding, especially in lexical decision
+and shape control.
+
+The most conservative interpretation is therefore that condition-related
+information is detectable in localized channels and in decoding space,
+but that this information was not sufficiently strong, stable, or
+distributed to yield significant whole-population latent separation in
+the current batch summary. This distinction should be preserved in the
+manuscript: significant channel-level effects are supported by the saved
+outputs, but those channel-level effects do not survive the stricter
+ROI-level FDR criterion, whereas significant population-level condition
+separation is also not supported by the saved batch report.

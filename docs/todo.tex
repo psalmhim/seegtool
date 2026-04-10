@@ -1,0 +1,21 @@
+\subsection*{Model validation and robustness analysis}
+
+To evaluate the dynamical properties and mechanistic validity of the proposed metabolically constrained neuron model, several numerical experiments were performed. These analyses were designed to test whether seizure-like activity arises from the hypothesized coupling between intracellular energy availability and neuronal excitability, and to assess the robustness of the phenomenon across different network conditions.
+
+\paragraph{Hysteresis analysis}
+To determine whether seizure emergence corresponds to a nonlinear transition in network dynamics, we performed a hysteresis experiment in which the ATP production parameter $\alpha_{ATP}$ was varied slowly over time. Starting from a stable asynchronous–irregular (AI) regime, $\alpha_{ATP}$ was gradually decreased from its baseline value to a metabolically stressed regime and subsequently increased back to the baseline level at the same rate. During this protocol, we monitored network synchrony, mean intracellular energy $\epsilon$, and the average leak reversal potential $E_L$. If seizure onset and termination occurred at different values of $\alpha_{ATP}$, this would indicate hysteresis and suggest that intracellular energy availability acts as a control parameter governing transitions between dynamical regimes.
+
+\paragraph{Mechanism ablation}
+To verify that seizure-like dynamics arise specifically from energy-dependent modulation of neuronal excitability, we performed a set of ablation experiments. First, the coupling between the energy variable $\epsilon$ and the leak reversal potential $E_L$ was removed while preserving the energy dynamics. In this condition, $E_L$ was fixed at its baseline value $E_0$. Second, the energetic cost of spike emission was removed by setting the spike cost parameter $\delta$ to zero. These experiments allowed us to determine whether seizure-like synchronization depends critically on the coupling between metabolic state and membrane excitability.
+
+\paragraph{Parameter robustness}
+To ensure that the observed dynamical transitions were not the result of fine-tuned parameter choices, we systematically varied key metabolic parameters. In particular, the ATP production parameter $\alpha_{ATP}$, the pump activity parameter $\alpha_P$, and the metabolic coupling strength $d_{\epsilon}$ were varied by $\pm 50\%$ around their baseline values. For each parameter configuration, we evaluated whether seizure-like synchronization occurred and measured the corresponding onset time and duration. Robust seizure generation across a broad parameter range indicates that the phenomenon is not restricted to a narrow parameter regime.
+
+\paragraph{Noise and input dependence}
+To evaluate the influence of external drive and background fluctuations, the network was simulated under multiple levels of external input. Specifically, the baseline Poisson drive was scaled by factors of $0.5$, $1.0$, and $1.5$ while keeping the metabolic perturbation protocol unchanged. Persistence of seizure-like transitions across these conditions indicates that the phenomenon is intrinsic to the metabolic–excitability coupling rather than a consequence of a particular noise regime.
+
+\paragraph{Finite-size effects}
+To assess whether seizure-like synchronization depends on network size, simulations were repeated for networks of different sizes while preserving the same connectivity statistics and synaptic scaling rules. Specifically, the network size was reduced and increased relative to the baseline configuration. Consistent transitions across these simulations suggest that the observed dynamics are not artifacts of finite network size.
+
+\paragraph{Information-theoretic analysis}
+Finally, to evaluate the functional consequences of metabolic destabilization, we analyzed spike trains using information-theoretic metrics. Spike trains were discretized into binary words of length $L=3$, and Shannon entropy and mutual information were computed for sliding temporal windows. The resulting measures were compared against the corresponding values of intracellular energy $\epsilon$ and network firing rate. This analysis allowed us to determine whether reductions in entropy and mutual information were associated primarily with metabolic thresholds or simply reflected increases in firing rate and synchrony.

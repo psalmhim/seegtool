@@ -1,0 +1,3171 @@
+\documentclass[11pt]{report}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{float}
+\title{Computational Analysis of SEEG Neural Population Dynamics}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\chapter{Introduction}
+
+Stereo-electroencephalography (SEEG) provides a unique opportunity to measure neural activity
+directly from distributed cortical networks with high temporal resolution.
+However, the high dimensionality and nonstationary nature of SEEG signals require
+integrated computational frameworks that combine signal processing,
+statistical inference, and population-level dynamical analysis.
+
+This report presents a comprehensive computational framework for SEEG analysis
+that integrates classical electrophysiological analysis methods with modern
+population dynamics approaches. The framework includes preprocessing,
+time--frequency analysis, statistical inference, latent trajectory analysis,
+and dynamical systems modeling of multichannel neural activity.
+
+\chapter{Experimental Data and Recording Methods}
+
+This chapter describes the experimental setup and recording procedures
+used to acquire stereo-electroencephalography (SEEG) signals.
+We summarize electrode implantation strategies, recording hardware,
+signal acquisition parameters, and experimental paradigms used to
+evoke neural responses. In addition, we describe the procedures used
+to synchronize experimental events with SEEG recordings.
+
+\section{Participants}
+
+SEEG recordings were obtained from participants undergoing clinical
+evaluation for drug-resistant epilepsy. Electrode implantation was
+performed based on clinical requirements determined by the treating
+neurologists and neurosurgeons. All experimental procedures were
+conducted in accordance with institutional ethical guidelines and
+approved by the relevant ethics committees.
+
+Participants provided informed consent for the use of their SEEG data
+for research purposes.
+
+\section{SEEG Electrode Implantation}
+
+Stereo-electroencephalography electrodes were implanted using a
+stereotactic surgical procedure. Each electrode consists of a linear
+array of cylindrical contacts that sample neural activity along the
+trajectory of the electrode.
+
+Typical electrode characteristics include:
+
+\begin{itemize}
+\item Contact diameter: approximately 0.8--1.0 mm
+\item Contact length: 2 mm
+\item Inter-contact spacing: 3--5 mm
+\item Number of contacts per electrode: 8--16
+\end{itemize}
+
+Electrodes were inserted to target cortical and subcortical regions
+of interest based on clinical hypotheses regarding seizure onset zones.
+The spatial distribution of electrode contacts provides sparse but
+high-resolution sampling of neural activity across distributed brain
+regions.
+
+\section{Recording Hardware and Signal Acquisition}
+
+SEEG signals were recorded using a clinical intracranial EEG
+recording system. Neural signals were amplified, digitized, and stored
+for offline analysis.
+
+Typical acquisition parameters include:
+
+\begin{itemize}
+\item Sampling rate: 1000--2000 Hz
+\item Analog bandwidth: approximately 0.1--500 Hz
+\item Digital resolution: 16-bit or higher
+\end{itemize}
+
+Signals were initially referenced to a common clinical reference
+electrode. Re-referencing was performed offline during preprocessing
+to obtain bipolar or common-average referenced signals.
+
+\section{Experimental Paradigms}
+
+Two types of experimental paradigms were analyzed in this study:
+
+\begin{itemize}
+\item Electrical stimulation experiments
+\item Cognitive task experiments
+\end{itemize}
+
+These paradigms provide complementary approaches to probing neural
+dynamics in SEEG recordings.
+
+\subsection{Electrical Stimulation Experiments}
+
+Electrical stimulation experiments were performed using pairs of
+adjacent SEEG contacts. Biphasic electrical pulses were delivered
+to stimulate cortical tissue while neural responses were recorded
+from surrounding electrodes.
+
+Typical stimulation parameters include:
+
+\begin{itemize}
+\item Pulse shape: biphasic square wave
+\item Pulse duration: 0.2--1 ms per phase
+\item Current amplitude: 1--5 mA
+\item Stimulation frequency: single pulse or low-frequency trains
+\end{itemize}
+
+Electrical stimulation provides controlled perturbations of neural
+circuits, allowing characterization of evoked responses and network
+propagation patterns.
+
+\subsection{Cognitive Task Experiments}
+
+In addition to electrical stimulation experiments, SEEG recordings
+were obtained during cognitive task paradigms designed to probe
+sensory, motor, or cognitive processing.
+
+Tasks were implemented using stimulus presentation software that
+recorded precise event timestamps for each trial. Typical events
+include stimulus onset, participant responses, and task-specific
+markers.
+
+These event markers allow alignment of neural activity to task
+events for subsequent analysis.
+
+\section{Event Timing and Synchronization}
+
+Precise synchronization between neural signals and experimental
+events is essential for event-related analysis.
+
+Event markers were transmitted from the stimulus presentation
+computer to the SEEG recording system using hardware triggers.
+These triggers were recorded alongside neural signals and stored
+as digital event channels.
+
+Each event entry contains the following information:
+
+\begin{itemize}
+\item Event type
+\item Event timestamp
+\item Trial identifier
+\item Experimental condition label
+\end{itemize}
+
+Event timestamps were used to construct event-locked neural epochs
+for subsequent analysis.
+
+\section{Data Organization and Metadata}
+
+SEEG datasets were organized into structured formats containing
+neural signals, event markers, and channel metadata.
+
+Typical dataset components include:
+
+\begin{itemize}
+\item Continuous SEEG signals
+\item Channel labels
+\item Sampling rate information
+\item Event tables
+\item Anatomical labels for electrode contacts
+\end{itemize}
+
+This structured organization facilitates reproducible computational
+analysis and integration with signal processing pipelines.
+
+
+\chapter{Signal Preprocessing}
+
+Raw stereo-electroencephalography (SEEG) recordings contain neural
+signals mixed with various sources of noise and artifacts.
+Preprocessing is therefore required to remove non-neural components
+while preserving physiologically meaningful neural activity.
+
+The preprocessing pipeline consists of the following stages:
+
+\begin{enumerate}
+\item Filtering and signal conditioning
+\item Re-referencing
+\item Bad channel detection
+\item Continuous artifact detection
+\item Electrical stimulation artifact suppression
+\end{enumerate}
+
+These steps produce cleaned continuous SEEG signals that can be used
+for event-related and population-level analyses.
+
+\section{SEEG Signal Model}
+
+The recorded SEEG signal can be modeled as a mixture of neural activity,
+artifacts, and measurement noise:
+
+\begin{equation}
+x(t) = s(t) + a(t) + \epsilon(t)
+\end{equation}
+
+where
+
+\begin{itemize}
+\item $s(t)$ represents neural population activity
+\item $a(t)$ represents artifacts (e.g., stimulation, motion, line noise)
+\item $\epsilon(t)$ represents measurement noise
+\end{itemize}
+
+The goal of preprocessing is to estimate a cleaned signal
+
+\begin{equation}
+\tilde{x}(t) \approx s(t)
+\end{equation}
+
+while minimizing distortion of neural dynamics.
+
+\section{Filtering}
+
+Filtering removes slow drift and high-frequency noise from SEEG signals.
+
+\subsection{High-Pass Filtering}
+
+Low-frequency drift can arise from electrode polarization or slow
+physiological fluctuations. A high-pass filter removes these slow
+components:
+
+\begin{equation}
+y(t) = x(t) * h_{HP}(t)
+\end{equation}
+
+where $h_{HP}(t)$ is the impulse response of the high-pass filter.
+
+Typical cutoff frequency:
+
+\begin{itemize}
+\item $f_{HP} = 0.5$ Hz
+\end{itemize}
+
+\subsection{Low-Pass Filtering}
+
+High-frequency noise above the physiological bandwidth is suppressed
+using a low-pass filter:
+
+\begin{equation}
+y(t) = x(t) * h_{LP}(t)
+\end{equation}
+
+Typical cutoff frequency:
+
+\begin{itemize}
+\item $f_{LP} = 250$ Hz
+\end{itemize}
+
+\subsection{Line Noise Removal}
+
+Electrical line noise introduces oscillatory contamination at
+50 Hz (or 60 Hz depending on location) and its harmonics.
+
+A notch filter is applied at each harmonic frequency:
+
+\begin{equation}
+y(t) = x(t) * h_{notch}(t)
+\end{equation}
+
+Typical notch frequencies include:
+
+\begin{itemize}
+\item 50 Hz
+\item 100 Hz
+\item 150 Hz
+\end{itemize}
+
+\section{Re-Referencing}
+
+SEEG recordings are initially referenced to a common clinical reference.
+To obtain physiologically meaningful signals, offline re-referencing
+is applied.
+
+\subsection{Common Average Reference}
+
+In common-average referencing (CAR), the average signal across all
+channels is subtracted from each channel:
+
+\begin{equation}
+x_i^{CAR}(t) =
+x_i(t) -
+\frac{1}{N}\sum_{j=1}^{N} x_j(t)
+\end{equation}
+
+where $N$ is the number of channels.
+
+\subsection{Bipolar Referencing}
+
+Bipolar referencing computes the difference between adjacent electrode
+contacts:
+
+\begin{equation}
+x_i^{bip}(t) = x_i(t) - x_{i+1}(t)
+\end{equation}
+
+Bipolar referencing suppresses common noise sources and improves
+spatial localization of neural signals.
+
+\section{Bad Channel Detection}
+
+Some SEEG channels may contain excessive noise due to poor electrode
+contact or hardware issues.
+
+Channels are identified as bad if they exhibit abnormal statistical
+properties.
+
+Typical metrics include:
+
+\begin{itemize}
+\item Signal variance
+\item RMS amplitude
+\item Line noise ratio
+\item Kurtosis
+\end{itemize}
+
+For example, channel variance is computed as
+
+\begin{equation}
+\sigma_i^2 = \frac{1}{T} \sum_{t=1}^{T} (x_i(t) - \bar{x}_i)^2
+\end{equation}
+
+Channels with variance exceeding a threshold relative to the median
+variance across channels are excluded from further analysis.
+
+\section{Continuous Artifact Detection}
+
+Large-amplitude artifacts can contaminate SEEG signals during recording.
+
+Artifact segments are detected using amplitude thresholds:
+
+\begin{equation}
+|x(t)| > \theta
+\end{equation}
+
+where $\theta$ is a predefined amplitude threshold.
+
+Detected artifact segments can either be:
+
+\begin{itemize}
+\item removed from analysis
+\item replaced using interpolation
+\item masked during event-locked analysis
+\end{itemize}
+
+\section{Electrical Stimulation Artifact Suppression}
+
+Electrical stimulation produces large transient artifacts that
+dominate SEEG signals immediately following the stimulation pulse.
+
+To suppress stimulation artifacts, a short post-stimulation time
+window is masked:
+
+\begin{equation}
+t_{mask} = [t_{stim}, t_{stim} + \Delta t]
+\end{equation}
+
+where $\Delta t$ typically ranges from 5--10 ms.
+
+Signal samples within this window are excluded from time–frequency
+analysis and statistical tests.
+
+\section{Output of Preprocessing}
+
+The preprocessing pipeline produces the following outputs:
+
+\begin{itemize}
+\item Cleaned continuous SEEG signals
+\item List of valid channels
+\item Artifact masks
+\item Metadata describing preprocessing parameters
+\end{itemize}
+
+These cleaned signals are subsequently used to construct event-locked
+epochs for trial-based neural analysis.
+
+
+
+
+
+\chapter{Event-Locked Signal Extraction}
+
+Event-related analysis requires segmentation of continuous SEEG signals
+into trials aligned to experimentally defined events. These events may
+correspond to electrical stimulation pulses or behavioral task events.
+Event-locked segmentation transforms continuous neural recordings into
+a structured trial representation suitable for statistical and
+time--frequency analysis.
+
+Let $x_i(t)$ denote the continuous SEEG signal recorded from channel $i$.
+Let $\tau_k$ denote the timestamp of event $k$.
+Event-locked neural signals are obtained by extracting time windows
+around each event.
+
+\begin{equation}
+x_i^{(k)}(t) = x_i(\tau_k + t)
+\end{equation}
+
+where $t$ denotes time relative to the event.
+
+The resulting dataset consists of a three-dimensional tensor:
+
+\begin{equation}
+X(k,i,t)
+\end{equation}
+
+where
+
+\begin{itemize}
+\item $k$ indexes trials
+\item $i$ indexes recording channels
+\item $t$ indexes time samples relative to the event
+\end{itemize}
+
+This representation forms the basis for all subsequent analyses.
+
+\section{Epoch Construction}
+
+For each event timestamp $\tau_k$, an epoch is extracted from the
+continuous signal using a predefined time window:
+
+\begin{equation}
+t \in [-T_{pre}, T_{post}]
+\end{equation}
+
+The extracted epoch therefore contains neural activity before and
+after the event:
+
+\begin{equation}
+x_i^{(k)}(t) =
+x_i(\tau_k + t),
+\quad
+t \in [-T_{pre}, T_{post}]
+\end{equation}
+
+Typical values include
+
+\begin{itemize}
+\item $T_{pre} = 1.0$ s
+\item $T_{post} = 1.0$ s
+\end{itemize}
+
+Epoch extraction produces a dataset of size
+
+\begin{equation}
+K \times N \times T
+\end{equation}
+
+where
+
+\begin{itemize}
+\item $K$ is the number of trials
+\item $N$ is the number of channels
+\item $T$ is the number of time samples
+\end{itemize}
+
+\section{Trial Structure}
+
+Each extracted trial contains three conceptual segments:
+
+\begin{enumerate}
+\item Prestimulus baseline
+\item Event response period
+\item Late post-event activity
+\end{enumerate}
+
+This structure allows separation of baseline neural activity from
+event-driven responses.
+
+\subsection{Prestimulus Window}
+
+The prestimulus window serves as a baseline reference period.
+Let the baseline interval be defined as
+
+\begin{equation}
+t \in [-T_{base}, 0]
+\end{equation}
+
+Baseline activity is used for:
+
+\begin{itemize}
+\item baseline normalization of spectral power
+\item trial-level quality control
+\item estimation of spontaneous neural activity
+\end{itemize}
+
+Typical baseline duration is
+
+\begin{equation}
+T_{base} = 500\text{--}800 \text{ ms}
+\end{equation}
+
+\subsection{Poststimulus Window}
+
+The poststimulus interval contains the neural response to the event:
+
+\begin{equation}
+t \in [0, T_{post}]
+\end{equation}
+
+For electrical stimulation experiments, the earliest portion of this
+window may contain stimulation artifacts. These samples are masked
+before further analysis:
+
+\begin{equation}
+t \in [0, t_{mask}]
+\end{equation}
+
+where $t_{mask}$ typically ranges from 5--10 ms.
+
+The remaining poststimulus interval contains physiologically meaningful
+neural responses used for ERP and time--frequency analyses.
+
+\chapter{Trial-Level Quality Control}
+
+Trial-level quality control procedures identify trials contaminated by
+noise or artifacts. Because SEEG recordings may contain transient
+disturbances, quality control ensures that downstream analyses are
+performed using reliable neural data.
+
+Quality metrics are computed from prestimulus neural activity to
+avoid bias from event-related responses.
+
+\section{Prestimulus Signal Metrics}
+
+Let $x_i^{(k)}(t)$ denote the signal from channel $i$ during trial $k$.
+Metrics are computed within the baseline window:
+
+\begin{equation}
+t \in [-T_{base},0]
+\end{equation}
+
+These statistics characterize the stability and noise level of
+each trial.
+
+\subsection{RMS Amplitude}
+
+Root-mean-square amplitude measures the overall signal magnitude:
+
+\begin{equation}
+RMS_i^{(k)} =
+\sqrt{
+\frac{1}{T}
+\sum_{t}
+x_i^{(k)}(t)^2
+}
+\end{equation}
+
+Large RMS values may indicate noise bursts or artifacts.
+
+\subsection{Variance}
+
+Signal variance measures fluctuation amplitude:
+
+\begin{equation}
+Var_i^{(k)} =
+\frac{1}{T}
+\sum_{t}
+(x_i^{(k)}(t) - \bar{x}_i^{(k)})^2
+\end{equation}
+
+where $\bar{x}_i^{(k)}$ is the mean baseline signal.
+
+\subsection{Peak-to-Peak Amplitude}
+
+Peak-to-peak amplitude captures extreme signal excursions:
+
+\begin{equation}
+P2P_i^{(k)} =
+\max_t x_i^{(k)}(t) -
+\min_t x_i^{(k)}(t)
+\end{equation}
+
+Large peak-to-peak values often indicate transient artifacts.
+
+\subsection{Kurtosis}
+
+Kurtosis measures deviations from Gaussian amplitude distributions:
+
+\begin{equation}
+Kurt_i^{(k)} =
+\frac{E[(x - \mu)^4]}{\sigma^4}
+\end{equation}
+
+High kurtosis may indicate rare but extreme signal deviations.
+
+\section{Composite Quality Score}
+
+To combine multiple metrics into a single quality measure,
+each statistic is normalized relative to the distribution
+across trials.
+
+Let $z_m^{(k)}$ denote the z-scored value of metric $m$ for trial $k$.
+
+A composite quality score is then defined as
+
+\begin{equation}
+Q^{(k)} =
+\sum_m w_m z_m^{(k)}
+\end{equation}
+
+where $w_m$ are weighting coefficients.
+
+This score summarizes the likelihood that a trial contains
+abnormal signal activity.
+
+\section{Trial Classification}
+
+Trials are categorized according to their composite quality score.
+
+Typical classification scheme:
+
+\begin{itemize}
+\item \textbf{Green trials}: high-quality trials retained for analysis
+\item \textbf{Yellow trials}: moderate artifacts, down-weighted
+\item \textbf{Red trials}: severe artifacts, excluded
+\end{itemize}
+
+Trials labeled as red are excluded from ERP estimation and
+time--frequency analysis.
+
+\chapter{Event-Related Potential Analysis}
+
+Event-related potentials (ERPs) provide a classical representation
+of stimulus-locked neural responses. ERPs represent the average
+neural activity across repeated trials aligned to an experimental
+event.
+
+\section{Robust ERP Estimation}
+
+Let $x_i^{(k)}(t)$ denote the signal from channel $i$ during trial $k$.
+
+The ERP is computed as the average across trials:
+
+\begin{equation}
+ERP_i(t) =
+\frac{1}{K}
+\sum_{k=1}^{K}
+x_i^{(k)}(t)
+\end{equation}
+
+However, simple averaging can be sensitive to outlier trials.
+Robust ERP estimation therefore incorporates trial weighting
+or robust statistics.
+
+\section{Weighted Averaging}
+
+Let $w_k$ denote the weight assigned to trial $k$ based on
+its quality score.
+
+The weighted ERP is defined as
+
+\begin{equation}
+ERP_i(t) =
+\frac{
+\sum_{k} w_k x_i^{(k)}(t)
+}{
+\sum_{k} w_k
+}
+\end{equation}
+
+where trials with lower quality receive smaller weights.
+
+\section{ERP Component Extraction}
+
+ERP waveforms often contain characteristic components
+reflecting neural processing stages.
+
+These components are typically characterized by:
+
+\begin{itemize}
+\item peak amplitude
+\item peak latency
+\item component width
+\end{itemize}
+
+Peak amplitude is defined as
+
+\begin{equation}
+A_i =
+\max_{t \in T_{ROI}} ERP_i(t)
+\end{equation}
+
+where $T_{ROI}$ denotes a predefined time window of interest.
+
+ERP component features provide summary measures of neural
+responses that can be used for statistical comparisons across
+conditions.
+
+
+
+
+\chapter{Time--Frequency Analysis}
+
+Neural signals recorded using SEEG exhibit complex oscillatory
+dynamics that evolve over time. Classical Fourier analysis provides
+information about frequency content but does not capture temporal
+changes in spectral activity. Time--frequency analysis therefore
+provides a framework for estimating spectral power as a function
+of both time and frequency.
+
+In this work, time--frequency representations are computed using
+Morlet wavelet transforms, which provide a flexible method for
+estimating oscillatory activity across a wide range of frequencies.
+
+\section{Time--Frequency Representation}
+
+A neural signal $x(t)$ can be represented in the time--frequency
+domain as
+
+\begin{equation}
+X(t,f)
+\end{equation}
+
+where $X(t,f)$ represents the complex spectral coefficient
+at time $t$ and frequency $f$.
+
+Time--frequency analysis therefore transforms a one-dimensional
+time series
+
+\begin{equation}
+x(t)
+\end{equation}
+
+into a two-dimensional representation
+
+\begin{equation}
+X(t,f)
+\end{equation}
+
+that describes how spectral power evolves over time.
+
+\section{Morlet Wavelet Transform}
+
+The Morlet wavelet is widely used for neural signal analysis due
+to its favorable time--frequency localization properties.
+
+The complex Morlet wavelet is defined as
+
+\begin{equation}
+\psi(t,f) =
+e^{2\pi i f t}
+\,
+e^{-\frac{t^2}{2\sigma^2}}
+\end{equation}
+
+where
+
+\begin{itemize}
+\item $f$ is the center frequency
+\item $\sigma$ controls the temporal width of the wavelet
+\end{itemize}
+
+The Gaussian envelope ensures that the wavelet is localized in time.
+
+The relationship between the temporal width $\sigma$ and the number
+of wavelet cycles $n_c$ is
+
+\begin{equation}
+\sigma = \frac{n_c}{2\pi f}
+\end{equation}
+
+Typical analyses use
+
+\begin{equation}
+n_c = 5\text{--}7
+\end{equation}
+
+cycles.
+
+\section{Wavelet Convolution}
+
+The time--frequency representation of a signal is obtained by
+convolving the signal with the complex wavelet.
+
+\begin{equation}
+Z(t,f) =
+x(t) * \psi(t,f)
+\end{equation}
+
+where $*$ denotes convolution.
+
+The result is a complex-valued signal
+
+\begin{equation}
+Z(t,f) = A(t,f)e^{i\phi(t,f)}
+\end{equation}
+
+where
+
+\begin{itemize}
+\item $A(t,f)$ represents amplitude
+\item $\phi(t,f)$ represents phase
+\end{itemize}
+
+\section{Spectral Power Estimation}
+
+Spectral power is obtained from the magnitude of the complex
+wavelet coefficient:
+
+\begin{equation}
+P(t,f) =
+|Z(t,f)|^2
+\end{equation}
+
+This quantity represents the instantaneous power of oscillatory
+activity at frequency $f$ and time $t$.
+
+\section{Baseline Normalization}
+
+To interpret event-related spectral changes, spectral power is
+normalized relative to a prestimulus baseline period.
+
+Let $P_{base}(f)$ denote the average power during the baseline
+interval
+
+\begin{equation}
+P_{base}(f) =
+\frac{1}{T_b}
+\sum_{t \in \text{baseline}} P(t,f)
+\end{equation}
+
+Baseline-normalized power can then be expressed in decibel units:
+
+\begin{equation}
+P_{dB}(t,f) =
+10\log_{10}
+\left(
+\frac{P(t,f)}{P_{base}(f)}
+\right)
+\end{equation}
+
+This normalization highlights relative increases or decreases
+in oscillatory power following experimental events.
+
+\section{Evoked and Induced Oscillations}
+
+Time--frequency responses can be separated into evoked and induced
+components.
+
+Evoked activity is phase-locked to the stimulus and is reflected
+in the event-related potential (ERP). Induced activity is not
+phase-locked and therefore varies across trials.
+
+To isolate induced oscillations, the ERP is first subtracted from
+each trial:
+
+\begin{equation}
+x_{induced}^{(k)}(t) =
+x^{(k)}(t) - ERP(t)
+\end{equation}
+
+where $k$ indexes trials.
+
+Wavelet analysis is then applied to the residual signal
+$x_{induced}^{(k)}(t)$ to estimate induced spectral power.
+
+\section{Inter-Trial Phase Coherence}
+
+Phase-based synchronization across trials can be quantified using
+inter-trial phase coherence (ITPC).
+
+Let $\phi_k(t,f)$ denote the phase of the wavelet coefficient for
+trial $k$.
+
+ITPC is defined as
+
+\begin{equation}
+ITPC(t,f) =
+\left|
+\frac{1}{N}
+\sum_{k=1}^{N}
+e^{i\phi_k(t,f)}
+\right|
+\end{equation}
+
+where $N$ is the number of trials.
+
+ITPC values range between
+
+\begin{itemize}
+\item $0$ (random phase across trials)
+\item $1$ (perfect phase locking)
+\end{itemize}
+
+ITPC therefore measures the consistency of phase alignment
+across repeated trials.
+
+\section{Frequency Bands of Interest}
+
+Neural oscillations are often summarized within canonical frequency
+bands:
+
+\begin{center}
+\begin{tabular}{ll}
+Theta & 4--8 Hz \\
+Alpha & 8--12 Hz \\
+Beta & 13--30 Hz \\
+Gamma & 30--70 Hz \\
+High-frequency activity & 70--150 Hz
+\end{tabular}
+\end{center}
+
+Band-limited power can be obtained by averaging spectral power
+across frequencies within each band.
+
+\section{Output of Time--Frequency Analysis}
+
+The time--frequency analysis produces the following outputs:
+
+\begin{itemize}
+\item Spectral power $P(t,f)$
+\item Baseline-normalized power $P_{dB}(t,f)$
+\item Induced spectral power
+\item Inter-trial phase coherence (ITPC)
+\item Band-limited power timecourses
+\end{itemize}
+
+These representations form the basis for subsequent statistical
+analysis and neural population dynamics modeling.
+
+
+\chapter{Oscillatory Neural Dynamics}
+
+Neural activity recorded using SEEG exhibits oscillatory dynamics across
+multiple frequency bands. Oscillations reflect coordinated activity
+of neural populations and are commonly modulated during sensory,
+cognitive, and motor processes.
+
+Oscillatory activity can be broadly divided into two components:
+
+\begin{itemize}
+\item Evoked oscillations, which are phase-locked to the stimulus
+\item Induced oscillations, which are not phase-locked and vary across trials
+\end{itemize}
+
+This chapter focuses on induced oscillatory activity and broadband
+high-frequency responses.
+
+\section{Induced Oscillations}
+
+Induced oscillations represent changes in spectral power that are not
+phase-locked to the stimulus. These responses vary across trials and
+are therefore not visible in the averaged ERP waveform.
+
+Let $x^{(k)}(t)$ denote the signal from trial $k$ and
+$ERP(t)$ the averaged event-related potential.
+
+Induced signals are obtained by removing the ERP from each trial:
+
+\begin{equation}
+x^{(k)}_{ind}(t) =
+x^{(k)}(t) - ERP(t)
+\end{equation}
+
+Time--frequency analysis is then applied to the residual signal to
+estimate induced spectral power.
+
+\section{High-Frequency Activity}
+
+High-frequency activity (HFA), typically in the range
+70--150 Hz, is widely used as a proxy for local neuronal population
+firing.
+
+Let $P(t,f)$ denote spectral power obtained from the wavelet transform.
+High-frequency activity is computed by averaging power across the
+high-frequency band:
+
+\begin{equation}
+HFA(t) =
+\frac{1}{|F|}
+\sum_{f \in F} P(t,f)
+\end{equation}
+
+where $F$ denotes the set of frequencies within the high-frequency band.
+
+High-frequency activity provides a sensitive measure of local neural
+activation.
+
+\section{Band-Limited Power}
+
+Spectral power is often summarized within canonical frequency bands.
+Band-limited power is obtained by averaging spectral power across
+frequencies within a given band.
+
+\begin{equation}
+B_{band}(t) =
+\frac{1}{|F_{band}|}
+\sum_{f \in F_{band}} P(t,f)
+\end{equation}
+
+Typical frequency bands include:
+
+\begin{center}
+\begin{tabular}{ll}
+Theta & 4--8 Hz \\
+Alpha & 8--12 Hz \\
+Beta & 13--30 Hz \\
+Gamma & 30--70 Hz \\
+High-frequency activity & 70--150 Hz
+\end{tabular}
+\end{center}
+
+Band-limited power timecourses provide compact representations of
+oscillatory neural responses.
+
+\chapter{Phase-Based Neural Synchronization}
+
+In addition to spectral power, neural oscillations contain phase
+information that reflects synchronization across trials or brain
+regions.
+
+Phase-based metrics capture stimulus-locked phase alignment of
+oscillatory activity.
+
+\section{Inter-Trial Phase Coherence}
+
+Inter-trial phase coherence (ITPC) measures the consistency of phase
+across trials.
+
+Let $\phi_k(t,f)$ denote the phase of the complex wavelet coefficient
+for trial $k$.
+
+ITPC is defined as
+
+\begin{equation}
+ITPC(t,f) =
+\left|
+\frac{1}{N}
+\sum_{k=1}^{N}
+e^{i\phi_k(t,f)}
+\right|
+\end{equation}
+
+where $N$ is the number of trials.
+
+ITPC ranges between 0 and 1, where
+
+\begin{itemize}
+\item $0$ indicates random phase across trials
+\item $1$ indicates perfect phase locking
+\end{itemize}
+
+\section{Phase Locking Value}
+
+Phase locking value (PLV) measures synchronization between two
+recording channels.
+
+Let $\phi_i(t,f)$ and $\phi_j(t,f)$ denote the phases of channels
+$i$ and $j$.
+
+The PLV is defined as
+
+\begin{equation}
+PLV_{ij}(t,f) =
+\left|
+\frac{1}{N}
+\sum_{k=1}^{N}
+e^{i(\phi_{i,k}(t,f)-\phi_{j,k}(t,f))}
+\right|
+\end{equation}
+
+PLV captures phase coupling between spatially distributed neural
+populations.
+
+\chapter{Statistical Inference}
+
+Statistical inference is used to determine whether observed neural
+responses differ significantly from baseline activity or across
+experimental conditions.
+
+Because neural data often violate parametric assumptions,
+nonparametric permutation tests are widely used.
+
+\section{Permutation Testing}
+
+Permutation testing constructs a null distribution by randomly
+reassigning condition labels across trials.
+
+Let $T$ denote a test statistic computed from the observed data.
+Permutation testing proceeds as follows:
+
+\begin{enumerate}
+\item Randomly shuffle condition labels
+\item Recompute the statistic $T$
+\item Repeat for many permutations
+\end{enumerate}
+
+The empirical p-value is computed as
+
+\begin{equation}
+p =
+\frac{\#(T_{perm} \ge T_{obs}) + 1}{N_{perm} + 1}
+\end{equation}
+
+where $T_{perm}$ are statistics obtained from permuted data.
+
+\section{ROI-Based Statistics}
+
+Region-of-interest (ROI) statistics summarize neural responses within
+predefined time or frequency windows.
+
+For example, band-limited power may be averaged over a time interval
+
+\begin{equation}
+S =
+\frac{1}{|T|}
+\sum_{t \in T} B_{band}(t)
+\end{equation}
+
+Permutation testing is then applied to compare this statistic across
+conditions.
+
+\section{Cluster-Based Time--Frequency Statistics}
+
+Cluster-based permutation tests control the multiple-comparison
+problem inherent in time--frequency maps.
+
+Adjacent time--frequency points exceeding a statistical threshold
+are grouped into clusters.
+
+The cluster statistic is defined as
+
+\begin{equation}
+C =
+\sum_{(t,f) \in cluster} T(t,f)
+\end{equation}
+
+where $T(t,f)$ denotes the local test statistic.
+
+Cluster significance is evaluated using permutation-based null
+distributions.
+
+\section{Multiple Comparison Correction}
+
+Because SEEG analyses often involve many channels and timepoints,
+multiple comparison correction is necessary.
+
+False discovery rate (FDR) correction controls the expected
+proportion of false positives among significant tests.
+
+\section{Response Onset Detection}
+
+Response onset detection identifies the earliest timepoint at which
+neural activity deviates significantly from baseline.
+
+Permutation-based max-statistic methods are used to control
+family-wise error across timepoints.
+
+\chapter{Multichannel Neural Population Representation}
+
+Single-channel analysis captures local neural responses but does not
+fully characterize distributed neural dynamics.
+
+Multichannel SEEG recordings are therefore represented as neural
+population states.
+
+\section{Feature Tensor Construction}
+
+Neural features extracted from each channel are combined into a
+multidimensional tensor representation.
+
+Let
+
+\begin{equation}
+X(k,i,t)
+\end{equation}
+
+denote the neural feature from trial $k$, channel $i$, and time $t$.
+
+This representation captures the spatiotemporal structure of neural
+population activity.
+
+\section{Trial × Channel × Time Representations}
+
+The resulting tensor
+
+\begin{equation}
+X \in \mathbb{R}^{K \times N \times T}
+\end{equation}
+
+contains
+
+\begin{itemize}
+\item $K$ trials
+\item $N$ channels
+\item $T$ time samples
+\end{itemize}
+
+For population-level analyses, this tensor is reshaped into a
+matrix representation
+
+\begin{equation}
+X(t) \in \mathbb{R}^{N}
+\end{equation}
+
+representing the neural population state at time $t$.
+
+\chapter{Dimensionality Reduction}
+
+Multichannel neural population activity often evolves within a
+low-dimensional subspace of the high-dimensional recording space.
+
+Dimensionality reduction methods identify latent variables that
+capture coordinated neural dynamics.
+
+\section{Principal Component Analysis}
+
+Principal component analysis (PCA) identifies orthogonal directions
+that maximize variance in the neural data.
+
+Let $X$ denote the data matrix with dimensions $N \times T$.
+
+PCA computes eigenvectors of the covariance matrix
+
+\begin{equation}
+\Sigma =
+\frac{1}{T} XX^T
+\end{equation}
+
+The principal components correspond to eigenvectors of $\Sigma$.
+
+Latent neural states are obtained by projecting the data onto the
+leading components:
+
+\begin{equation}
+z(t) = W^T x(t)
+\end{equation}
+
+where $W$ contains the principal component vectors.
+
+\section{Factor Analysis}
+
+Factor analysis models neural activity as a combination of latent
+factors and independent noise.
+
+\begin{equation}
+x(t) = W z(t) + \epsilon
+\end{equation}
+
+where
+
+\begin{itemize}
+\item $z(t)$ represents latent factors
+\item $W$ is a loading matrix
+\item $\epsilon$ is Gaussian noise
+\end{itemize}
+
+Factor analysis separates shared neural variability from
+channel-specific noise.
+
+\section{Gaussian Process Factor Analysis}
+
+Gaussian process factor analysis (GPFA) extends factor analysis
+by modeling latent trajectories as smooth temporal processes.
+
+Each latent dimension follows a Gaussian process prior:
+
+\begin{equation}
+z_d(t) \sim GP(0, k(t,t'))
+\end{equation}
+
+where $k(t,t')$ is a covariance kernel that enforces temporal
+smoothness.
+
+GPFA is particularly useful for recovering smooth neural trajectories
+from noisy population recordings.
+
+
+\chapter{Latent Neural Trajectories}
+
+Multichannel SEEG recordings capture high-dimensional neural activity
+across distributed brain regions. However, neural population activity
+often evolves within a low-dimensional subspace. Dimensionality
+reduction methods such as PCA or factor analysis can therefore
+identify latent neural variables that summarize coordinated neural
+dynamics.
+
+Let $x(t) \in \mathbb{R}^{N}$ denote the multichannel neural activity
+vector at time $t$, where $N$ is the number of recording channels.
+
+Dimensionality reduction projects the neural activity into a
+low-dimensional latent state space:
+
+\begin{equation}
+z(t) = W^{T}x(t)
+\end{equation}
+
+where
+
+\begin{itemize}
+\item $z(t) \in \mathbb{R}^{D}$ is the latent neural state
+\item $W$ is the projection matrix
+\item $D \ll N$ is the dimensionality of the latent space
+\end{itemize}
+
+The time evolution of the latent state $z(t)$ forms a neural trajectory
+within the low-dimensional state space.
+
+\section{Single-Trial Trajectories}
+
+For each trial $k$, the multichannel neural activity can be represented
+as a time-varying latent state vector:
+
+\begin{equation}
+z^{(k)}(t) = W^{T} x^{(k)}(t)
+\end{equation}
+
+where
+
+\begin{itemize}
+\item $x^{(k)}(t)$ is the neural population vector during trial $k$
+\item $z^{(k)}(t)$ is the corresponding latent neural state
+\end{itemize}
+
+The sequence of latent states across time forms a trajectory:
+
+\begin{equation}
+\mathbf{z}^{(k)} =
+\left\{
+z^{(k)}(t_1),
+z^{(k)}(t_2),
+\dots,
+z^{(k)}(t_T)
+\right\}
+\end{equation}
+
+Each trial therefore corresponds to a trajectory through the latent
+state space.
+
+These trajectories describe how neural population activity evolves
+over time in response to experimental events.
+
+Because neural recordings are noisy, trajectories are often smoothed
+using temporal filtering. For example, Gaussian smoothing can be
+applied to each latent dimension:
+
+\begin{equation}
+\tilde{z}^{(k)}(t) =
+\sum_{\tau} z^{(k)}(\tau)
+\, g(t-\tau)
+\end{equation}
+
+where $g(t)$ denotes a Gaussian smoothing kernel.
+
+Single-trial trajectories provide insight into trial-to-trial
+variability of neural population dynamics.
+
+\section{Condition-Averaged Trajectories}
+
+To characterize population responses associated with different
+experimental conditions, trajectories are averaged across trials
+belonging to the same condition.
+
+Let $\mathcal{C}$ denote the set of trials belonging to a particular
+condition.
+
+The condition-averaged trajectory is defined as
+
+\begin{equation}
+\bar{z}_{\mathcal{C}}(t) =
+\frac{1}{|\mathcal{C}|}
+\sum_{k \in \mathcal{C}}
+z^{(k)}(t)
+\end{equation}
+
+This trajectory represents the average neural population response
+for that condition.
+
+Condition-averaged trajectories can be visualized in two- or
+three-dimensional latent space to reveal differences between
+experimental conditions.
+
+In addition, the distance between condition trajectories can be
+computed as
+
+\begin{equation}
+d(t) =
+\left\|
+\bar{z}_{A}(t) - \bar{z}_{B}(t)
+\right\|
+\end{equation}
+
+where $A$ and $B$ denote two experimental conditions.
+
+Trajectory separation over time provides a quantitative measure of
+how neural population dynamics differ between conditions.
+
+The latent neural trajectories obtained in this chapter serve as the
+basis for subsequent analyses of neural population geometry and
+dynamical systems structure.
+
+
+\chapter{Trajectory Geometry}
+
+Latent neural trajectories describe how population activity evolves
+through a low-dimensional state space. The geometric properties of
+these trajectories provide insight into the structure of neural
+population dynamics.
+
+Let
+
+\begin{equation}
+z(t) \in \mathbb{R}^{D}
+\end{equation}
+
+denote the latent neural state at time $t$, where $D$ is the number
+of latent dimensions.
+
+The sequence
+
+\begin{equation}
+\mathbf{z} = \{z(t_1), z(t_2), \dots, z(t_T)\}
+\end{equation}
+
+defines a trajectory through latent state space.
+
+Geometric properties of this trajectory can be quantified using
+velocity, curvature, dispersion, and path length.
+
+\section{Trajectory Velocity}
+
+Trajectory velocity describes the rate at which the neural population
+state changes over time.
+
+The instantaneous velocity is defined as the temporal derivative of
+the latent state:
+
+\begin{equation}
+v(t) =
+\frac{d z(t)}{dt}
+\end{equation}
+
+In discrete time, velocity is approximated using finite differences:
+
+\begin{equation}
+v(t) =
+z(t+\Delta t) - z(t)
+\end{equation}
+
+The magnitude of the velocity vector provides a scalar measure of
+the speed of neural state evolution:
+
+\begin{equation}
+||v(t)|| =
+\sqrt{\sum_{d=1}^{D} v_d(t)^2}
+\end{equation}
+
+High velocity indicates rapid transitions in neural population
+activity, whereas low velocity corresponds to relatively stable
+neural states.
+
+\section{Trajectory Curvature}
+
+Trajectory curvature quantifies how sharply the neural trajectory
+changes direction in latent state space.
+
+Let
+
+\begin{equation}
+v(t) = \frac{dz}{dt}
+\end{equation}
+
+denote the velocity vector, and
+
+\begin{equation}
+a(t) = \frac{d^2 z}{dt^2}
+\end{equation}
+
+denote the acceleration vector.
+
+Curvature is defined as
+
+\begin{equation}
+\kappa(t) =
+\frac{||v(t) \times a(t)||}{||v(t)||^3}
+\end{equation}
+
+In practice, curvature can be approximated using discrete derivatives
+of the latent trajectory.
+
+High curvature indicates rapid changes in trajectory direction,
+suggesting transitions between neural population states.
+
+\section{Trajectory Dispersion}
+
+Trajectory dispersion measures the variability of neural trajectories
+across trials.
+
+Let $z^{(k)}(t)$ denote the latent trajectory for trial $k$, and
+$\bar{z}(t)$ the condition-averaged trajectory.
+
+Dispersion is defined as the average distance between single-trial
+trajectories and the mean trajectory:
+
+\begin{equation}
+D(t) =
+\frac{1}{K}
+\sum_{k=1}^{K}
+||z^{(k)}(t) - \bar{z}(t)||
+\end{equation}
+
+where $K$ is the number of trials.
+
+High dispersion indicates greater trial-to-trial variability in neural
+population dynamics.
+
+\section{Path Length}
+
+Trajectory path length measures the total distance traveled by the
+neural trajectory in latent state space.
+
+Let
+
+\begin{equation}
+v(t) = z(t+\Delta t) - z(t)
+\end{equation}
+
+denote the incremental displacement vector.
+
+The total path length is defined as
+
+\begin{equation}
+L =
+\sum_{t=1}^{T-1}
+||z(t+1) - z(t)||
+\end{equation}
+
+Path length provides a measure of the overall magnitude of neural
+population state changes during the response period.
+
+Longer path lengths indicate greater neural population dynamics
+following experimental events.
+
+The geometric metrics defined in this chapter provide quantitative
+descriptions of neural population trajectories and form the basis for
+subsequent analyses of condition separation and dynamical systems
+structure.
+
+
+\chapter{Condition Separation in Latent Space}
+
+Latent neural trajectories provide a compact representation of
+multichannel neural population dynamics. When neural responses differ
+between experimental conditions, the corresponding trajectories may
+diverge within the latent state space.
+
+Quantifying this divergence allows identification of neural population
+dynamics that distinguish experimental conditions.
+
+Let
+
+\begin{equation}
+z^{(k)}(t) \in \mathbb{R}^{D}
+\end{equation}
+
+denote the latent neural state at time $t$ for trial $k$.
+
+Trials are grouped according to experimental condition
+(e.g., condition $A$ and condition $B$).
+
+\section{Condition Centroids}
+
+For each condition, the average latent trajectory is computed across
+all trials belonging to that condition.
+
+Let $\mathcal{C}$ denote the set of trials for a given condition.
+
+The condition centroid trajectory is defined as
+
+\begin{equation}
+\bar{z}_{\mathcal{C}}(t) =
+\frac{1}{|\mathcal{C}|}
+\sum_{k \in \mathcal{C}} z^{(k)}(t)
+\end{equation}
+
+This trajectory represents the average neural population response
+associated with that experimental condition.
+
+Condition centroids provide a simplified representation of neural
+population dynamics and are commonly used to visualize condition
+differences in latent state space.
+
+\section{Inter-Condition Distance}
+
+To quantify differences between conditions, the distance between
+condition centroid trajectories can be computed.
+
+The simplest measure is Euclidean distance:
+
+\begin{equation}
+d(t) =
+\left\|
+\bar{z}_{A}(t) -
+\bar{z}_{B}(t)
+\right\|
+\end{equation}
+
+where $\bar{z}_{A}(t)$ and $\bar{z}_{B}(t)$ denote centroid trajectories
+for conditions $A$ and $B$.
+
+Alternatively, Mahalanobis distance can be used to account for
+covariance structure of the neural state space:
+
+\begin{equation}
+d_M(t) =
+\sqrt{
+(\bar{z}_A(t)-\bar{z}_B(t))^T
+\Sigma^{-1}
+(\bar{z}_A(t)-\bar{z}_B(t))
+}
+\end{equation}
+
+where $\Sigma$ is the covariance matrix of latent states.
+
+Mahalanobis distance provides a scale-invariant measure of
+condition separation.
+
+\section{Time-Resolved Trajectory Separation}
+
+Condition separation is often evaluated as a function of time in
+order to identify when neural trajectories begin to diverge.
+
+For each timepoint $t$, a separation statistic is computed using
+the distances between single-trial trajectories and condition
+centroids.
+
+For example, a separation index can be defined as
+
+\begin{equation}
+S(t) =
+\frac{
+\left\|
+\bar{z}_{A}(t) - \bar{z}_{B}(t)
+\right\|
+}{
+\sigma_A(t) + \sigma_B(t)
+}
+\end{equation}
+
+where
+
+\begin{equation}
+\sigma_A(t) =
+\frac{1}{|A|}
+\sum_{k \in A}
+\left\|
+z^{(k)}(t) - \bar{z}_A(t)
+\right\|
+\end{equation}
+
+measures within-condition dispersion.
+
+Large values of $S(t)$ indicate strong separation between
+condition trajectories.
+
+Statistical significance of trajectory separation can be assessed
+using permutation testing. Condition labels are randomly shuffled
+across trials, and the separation statistic is recomputed to
+generate a null distribution.
+
+The observed statistic is then compared to this null distribution
+to determine whether neural trajectories diverge significantly
+between conditions.
+
+Timepoints at which significant separation occurs indicate when
+neural population dynamics begin to encode experimental condition
+information.
+
+\chapter{Rotational Neural Dynamics}
+
+Neural population activity often evolves according to structured
+dynamical patterns. In many neural systems, population responses
+exhibit rotational structure in low-dimensional latent state space.
+Such rotational dynamics have been observed in motor cortex,
+sensory systems, and other neural populations.
+
+Rotational dynamics reflect coordinated activity patterns that
+evolve according to underlying neural circuits.
+
+This chapter introduces methods for identifying rotational
+structure in latent neural trajectories using jPCA.
+
+\section{Neural Population Dynamics}
+
+Let
+
+\begin{equation}
+z(t) \in \mathbb{R}^{D}
+\end{equation}
+
+denote the latent neural state vector obtained from dimensionality
+reduction of multichannel SEEG activity.
+
+The temporal evolution of neural population activity can be
+approximated using a linear dynamical system:
+
+\begin{equation}
+\frac{dz(t)}{dt} = M z(t)
+\end{equation}
+
+where
+
+\begin{itemize}
+\item $z(t)$ is the latent neural state
+\item $M$ is a dynamics matrix
+\end{itemize}
+
+The matrix $M$ determines how neural states evolve through time.
+
+\section{Rotational Dynamics}
+
+If the dynamics matrix $M$ is skew-symmetric
+
+\begin{equation}
+M = -M^T
+\end{equation}
+
+then the resulting dynamics correspond to pure rotations in state
+space.
+
+In this case,
+
+\begin{equation}
+\frac{dz(t)}{dt} = M z(t)
+\end{equation}
+
+generates circular trajectories in the latent space.
+
+Such rotational dynamics indicate that neural activity evolves
+through structured population states rather than simply increasing
+or decreasing in amplitude.
+
+\section{jPCA Analysis}
+
+jPCA (Jordan canonical projection analysis) is used to identify
+rotational structure in neural population activity.
+
+The method proceeds by estimating the temporal derivative of the
+latent trajectory:
+
+\begin{equation}
+\dot{z}(t) =
+\frac{dz(t)}{dt}
+\end{equation}
+
+A linear model is then fitted:
+
+\begin{equation}
+\dot{z}(t) = M z(t)
+\end{equation}
+
+The matrix $M$ is constrained to be skew-symmetric:
+
+\begin{equation}
+M = -M^T
+\end{equation}
+
+This constraint ensures that the resulting dynamics correspond
+to rotational flow.
+
+The skew-symmetric matrix can be parameterized as
+
+\begin{equation}
+M =
+\begin{bmatrix}
+0 & -a \\
+a & 0
+\end{bmatrix}
+\end{equation}
+
+for a two-dimensional rotational plane.
+
+\section{Extraction of Rotational Planes}
+
+Eigenvectors of the dynamics matrix define rotational planes in
+the latent state space.
+
+The dominant rotational components correspond to eigenvectors
+associated with the largest imaginary eigenvalues.
+
+These components define a two-dimensional plane in which neural
+trajectories exhibit the strongest rotational structure.
+
+Let $W_{rot}$ denote the projection matrix for the rotational
+subspace.
+
+Rotational trajectories are then obtained as
+
+\begin{equation}
+z_{rot}(t) = W_{rot}^{T} z(t)
+\end{equation}
+
+\section{Visualization of Rotational Dynamics}
+
+Rotational neural dynamics can be visualized by plotting neural
+trajectories in the rotational plane.
+
+For each experimental condition, the condition-averaged trajectory
+
+\begin{equation}
+\bar{z}(t)
+\end{equation}
+
+is projected into the rotational subspace:
+
+\begin{equation}
+z_{rot}(t) = W_{rot}^{T} \bar{z}(t)
+\end{equation}
+
+The resulting two-dimensional trajectory illustrates the temporal
+evolution of neural population activity.
+
+Differences between experimental conditions may appear as distinct
+rotational trajectories or phase shifts within the rotational
+plane.
+
+Identification of rotational dynamics provides evidence that
+neural population responses are governed by low-dimensional
+dynamical systems rather than independent channel responses.
+
+
+\chapter{Tangent Space Dynamics}
+
+Neural population trajectories describe the evolution of latent neural
+states over time. While trajectory geometry captures global properties
+such as velocity and curvature, the local dynamics of neural activity
+can be characterized by tangent vectors along the trajectory.
+
+Tangent vectors represent the instantaneous direction of neural
+population state evolution and therefore describe the local flow of
+neural dynamics in latent state space.
+
+Analyzing tangent vectors allows comparison of neural dynamics across
+experimental conditions and provides insight into the structure of the
+underlying neural dynamical system.
+
+\section{Tangent Vector Estimation}
+
+Let
+
+\begin{equation}
+z(t) \in \mathbb{R}^{D}
+\end{equation}
+
+denote the latent neural state vector at time $t$.
+
+The tangent vector of the trajectory is defined as the temporal
+derivative of the latent state:
+
+\begin{equation}
+v(t) = \frac{dz(t)}{dt}
+\end{equation}
+
+In discrete time, tangent vectors can be approximated using finite
+differences:
+
+\begin{equation}
+v(t) =
+\frac{z(t+\Delta t) - z(t-\Delta t)}{2\Delta t}
+\end{equation}
+
+where $\Delta t$ is the sampling interval.
+
+The resulting vector
+
+\begin{equation}
+v(t) \in \mathbb{R}^{D}
+\end{equation}
+
+represents the local direction of neural population flow in the latent
+state space.
+
+For each trial $k$, tangent vectors can be estimated as
+
+\begin{equation}
+v^{(k)}(t) =
+\frac{z^{(k)}(t+\Delta t) - z^{(k)}(t-\Delta t)}{2\Delta t}
+\end{equation}
+
+These vectors characterize the instantaneous dynamics of neural
+population activity.
+
+To reduce noise in derivative estimates, tangent vectors are often
+computed after temporal smoothing of the latent trajectories.
+
+\section{Principal Angle Analysis}
+
+To compare neural dynamics across experimental conditions, tangent
+vectors can be analyzed as subspaces in latent state space.
+
+Let
+
+\begin{equation}
+V_A(t) =
+[v_A^{(1)}(t), v_A^{(2)}(t), \dots]
+\end{equation}
+
+denote the set of tangent vectors for condition $A$, and
+
+\begin{equation}
+V_B(t)
+\end{equation}
+
+the corresponding vectors for condition $B$.
+
+These vectors span tangent subspaces that describe the local flow of
+neural dynamics for each condition.
+
+Similarity between tangent subspaces can be quantified using
+principal angles.
+
+Let $U_A$ and $U_B$ denote orthonormal bases for the tangent
+subspaces of conditions $A$ and $B$.
+
+Principal angles $\theta_i$ are defined as
+
+\begin{equation}
+\cos(\theta_i) =
+\sigma_i(U_A^T U_B)
+\end{equation}
+
+where $\sigma_i$ denotes the singular values obtained from
+singular value decomposition.
+
+Small principal angles indicate similar neural dynamics across
+conditions, whereas large angles indicate divergent population
+flows.
+
+Principal angle analysis therefore provides a geometric measure
+of differences in neural population dynamics beyond simple
+trajectory separation.
+
+Time-resolved principal angle analysis can reveal when neural
+population dynamics begin to diverge between experimental
+conditions.
+
+\chapter{Geometry of Neural Manifolds}
+
+Neural population activity often evolves within a low-dimensional
+subspace embedded in the high-dimensional neural recording space.
+This low-dimensional structure is commonly referred to as a
+\textit{neural manifold}. The neural manifold captures coordinated
+patterns of activity across multiple channels and reflects the
+collective dynamics of neural populations.
+
+Let
+
+\begin{equation}
+x(t) \in \mathbb{R}^{N}
+\end{equation}
+
+denote the multichannel neural activity vector, where $N$ is the
+number of recording channels. After dimensionality reduction, the
+latent neural state is represented as
+
+\begin{equation}
+z(t) \in \mathbb{R}^{D}, \quad D \ll N
+\end{equation}
+
+where $D$ denotes the dimensionality of the latent state space.
+
+The neural manifold is defined as the subset of latent space visited
+by neural trajectories during task performance.
+
+\section{State-Space Occupancy}
+
+State-space occupancy describes the region of latent space explored
+by neural population activity.
+
+Let
+
+\begin{equation}
+\mathcal{Z} = \{ z(t_1), z(t_2), \dots, z(t_T) \}
+\end{equation}
+
+denote the set of latent neural states observed across time.
+
+A simple measure of state-space occupancy is the covariance matrix
+of latent states:
+
+\begin{equation}
+\Sigma =
+\frac{1}{T}
+\sum_{t=1}^{T}
+(z(t) - \bar{z})
+(z(t) - \bar{z})^T
+\end{equation}
+
+where $\bar{z}$ denotes the mean latent state.
+
+Eigenvalues of $\Sigma$ characterize the spread of neural activity
+along different latent dimensions.
+
+Large eigenvalues indicate directions of strong neural population
+variability, whereas small eigenvalues correspond to constrained
+dimensions of the neural manifold.
+
+\section{Trajectory Recurrence}
+
+Trajectory recurrence measures the tendency of neural population
+states to revisit previously occupied regions of latent space.
+
+For two timepoints $t_i$ and $t_j$, the distance between neural
+states is defined as
+
+\begin{equation}
+d_{ij} =
+\| z(t_i) - z(t_j) \|
+\end{equation}
+
+A recurrence event occurs when
+
+\begin{equation}
+d_{ij} < \epsilon
+\end{equation}
+
+where $\epsilon$ is a small threshold.
+
+Recurrence matrices can be constructed as
+
+\begin{equation}
+R_{ij} =
+\begin{cases}
+1 & \text{if } d_{ij} < \epsilon \\
+0 & \text{otherwise}
+\end{cases}
+\end{equation}
+
+This matrix describes when neural population states return to
+previous regions of the manifold.
+
+Patterns in the recurrence matrix can reveal periodic dynamics
+or attractor-like structure in neural population activity.
+
+\section{Subspace Overlap}
+
+Neural manifolds associated with different experimental conditions
+can be compared by measuring the overlap between their respective
+subspaces.
+
+Let
+
+\begin{equation}
+U_A
+\end{equation}
+
+and
+
+\begin{equation}
+U_B
+\end{equation}
+
+denote orthonormal basis matrices spanning the neural manifolds
+for conditions $A$ and $B$.
+
+The overlap between these subspaces can be quantified using
+principal angles.
+
+Let $\theta_i$ denote the principal angles defined by
+
+\begin{equation}
+\cos(\theta_i) =
+\sigma_i(U_A^T U_B)
+\end{equation}
+
+where $\sigma_i$ are singular values obtained from singular value
+decomposition.
+
+Small principal angles indicate strong overlap between neural
+manifolds, whereas large angles indicate that neural population
+activity occupies different subspaces under the two conditions.
+
+Subspace overlap therefore provides a quantitative measure of
+differences in the global structure of neural population activity.
+
+\chapter{Neural Decoding}
+
+Latent neural states extracted from multichannel SEEG recordings
+provide a compact representation of neural population dynamics.
+If neural activity encodes experimental variables, these latent
+states should contain information that allows prediction of
+experimental conditions or behavioral events.
+
+Neural decoding methods quantify how well experimental variables
+can be predicted from neural population activity.
+
+\section{Latent-State Representation}
+
+Let
+
+\begin{equation}
+z^{(k)}(t) \in \mathbb{R}^{D}
+\end{equation}
+
+denote the latent neural state vector for trial $k$ at time $t$,
+obtained from dimensionality reduction.
+
+Each trial is associated with a condition label
+
+\begin{equation}
+y^{(k)} \in \{1,2,\dots,C\}
+\end{equation}
+
+where $C$ denotes the number of experimental conditions.
+
+The decoding task consists of predicting the condition label
+$y^{(k)}$ from the neural state $z^{(k)}(t)$.
+
+\section{Linear Classifier}
+
+A common approach is to use a linear classifier that maps latent
+neural states to predicted condition labels.
+
+For example, a linear discriminant classifier computes
+
+\begin{equation}
+\hat{y} =
+\arg\max_c
+\left(
+w_c^T z + b_c
+\right)
+\end{equation}
+
+where
+
+\begin{itemize}
+\item $w_c$ is the classifier weight vector
+\item $b_c$ is the bias term
+\end{itemize}
+
+Classifier parameters are estimated using training data.
+
+\section{Cross-Validation}
+
+To avoid overfitting, decoding performance is evaluated using
+cross-validation.
+
+Trials are partitioned into training and testing sets.
+The classifier is trained on the training set and evaluated
+on held-out test trials.
+
+Typical cross-validation schemes include:
+
+\begin{itemize}
+\item k-fold cross-validation
+\item leave-one-trial-out
+\item leave-one-condition-out
+\end{itemize}
+
+Decoding accuracy is computed as
+
+\begin{equation}
+Accuracy =
+\frac{\text{Number of correct predictions}}
+{\text{Total number of test trials}}
+\end{equation}
+
+\section{Time-Resolved Decoding}
+
+To determine when neural population activity begins to encode
+experimental variables, decoding can be performed separately
+for each timepoint.
+
+For each time $t$, the classifier is trained using latent states
+$z^{(k)}(t)$ and corresponding labels $y^{(k)}$.
+
+This produces a decoding accuracy timecourse
+
+\begin{equation}
+A(t)
+\end{equation}
+
+which reflects the temporal evolution of decodable information
+in the neural population.
+
+\section{Permutation Testing}
+
+To assess statistical significance of decoding performance,
+permutation testing is used.
+
+Condition labels are randomly shuffled across trials, and
+decoding accuracy is recomputed.
+
+This procedure generates a null distribution
+
+\begin{equation}
+A_{perm}(t)
+\end{equation}
+
+representing decoding accuracy expected by chance.
+
+The observed decoding accuracy is compared to the null
+distribution to compute a p-value.
+
+\section{Decoding Onset Detection}
+
+An important question is when neural activity begins to encode
+experimental information.
+
+Decoding onset is defined as the earliest timepoint at which
+decoding accuracy exceeds the permutation threshold.
+
+Formally,
+
+\begin{equation}
+t_{onset} =
+\min
+\left\{
+t \mid
+A(t) > A_{threshold}
+\right\}
+\end{equation}
+
+where $A_{threshold}$ is determined from the permutation
+distribution.
+
+Decoding onset therefore identifies the time at which neural
+population activity begins to represent experimental conditions.
+
+\section{Relationship to Neural Trajectories}
+
+Decoding results can be related to the geometry of neural
+trajectories.
+
+When trajectories corresponding to different conditions diverge
+in latent state space, decoding accuracy increases.
+
+Thus, neural decoding provides a complementary perspective on
+neural population dynamics, linking latent trajectory geometry
+to information encoding in neural populations.
+
+
+\chapter{Uncertainty Quantification}
+
+Neural trajectories estimated from multichannel SEEG recordings
+reflect both true neural population dynamics and variability arising
+from finite sampling and measurement noise. Quantifying uncertainty
+in trajectory estimates is therefore essential for reliable
+interpretation of neural population analyses.
+
+Bootstrap resampling methods provide a nonparametric approach for
+estimating confidence intervals for neural trajectories and derived
+trajectory statistics.
+
+\section{Bootstrap Trajectories}
+
+Bootstrap methods estimate the variability of neural trajectories by
+resampling trials with replacement.
+
+Let
+
+\begin{equation}
+\{ z^{(1)}(t), z^{(2)}(t), \dots, z^{(K)}(t) \}
+\end{equation}
+
+denote the set of single-trial latent trajectories for a given
+experimental condition.
+
+A bootstrap sample is generated by randomly sampling $K$ trials
+with replacement from the original set of trials. The condition-
+averaged trajectory is then recomputed for the bootstrap sample:
+
+\begin{equation}
+\bar{z}^{*}(t) =
+\frac{1}{K}
+\sum_{k=1}^{K}
+z^{*(k)}(t)
+\end{equation}
+
+where $z^{*(k)}(t)$ denotes trajectories selected in the bootstrap
+sample.
+
+Repeating this procedure for $B$ bootstrap iterations produces
+a set of bootstrap trajectories:
+
+\begin{equation}
+\{ \bar{z}^{*(1)}(t), \bar{z}^{*(2)}(t), \dots, \bar{z}^{*(B)}(t) \}
+\end{equation}
+
+This ensemble of trajectories provides an empirical estimate of
+trajectory variability.
+
+Bootstrap samples can also be used to estimate confidence intervals
+for trajectory-derived quantities such as
+
+\begin{itemize}
+\item trajectory velocity
+\item trajectory curvature
+\item path length
+\item condition separation distance
+\end{itemize}
+
+Confidence intervals are obtained by computing the desired statistic
+for each bootstrap sample and extracting percentile bounds from the
+resulting distribution.
+
+\section{Confidence Tubes}
+
+Confidence tubes provide a geometric representation of uncertainty
+around neural trajectories in latent state space.
+
+Let
+
+\begin{equation}
+\bar{z}(t)
+\end{equation}
+
+denote the condition-averaged trajectory and
+
+\begin{equation}
+\bar{z}^{*(b)}(t)
+\end{equation}
+
+the bootstrap trajectory from bootstrap iteration $b$.
+
+The covariance of bootstrap trajectories at time $t$ is defined as
+
+\begin{equation}
+\Sigma(t) =
+\frac{1}{B}
+\sum_{b=1}^{B}
+(\bar{z}^{*(b)}(t) - \bar{z}(t))
+(\bar{z}^{*(b)}(t) - \bar{z}(t))^T
+\end{equation}
+
+This covariance matrix describes the uncertainty of the neural state
+estimate at time $t$.
+
+A confidence region around the trajectory can then be defined as
+
+\begin{equation}
+(z - \bar{z}(t))^T \Sigma(t)^{-1} (z - \bar{z}(t)) \le \chi^2_{\alpha}
+\end{equation}
+
+where $\chi^2_{\alpha}$ denotes the chi-squared threshold corresponding
+to the desired confidence level.
+
+The resulting region forms a confidence tube surrounding the mean
+trajectory.
+
+Confidence tubes allow visualization of uncertainty in neural
+population dynamics and provide a statistical framework for
+comparing trajectories across experimental conditions.
+
+When confidence tubes for two conditions do not overlap, this
+provides evidence that neural population trajectories differ
+significantly between conditions.
+
+
+\chapter{Visualization of Neural Dynamics}
+
+Visualization plays a critical role in interpreting neural population
+dynamics derived from SEEG recordings. Effective visualization methods
+allow researchers to explore neural responses at multiple levels of
+analysis, including single-channel responses, oscillatory activity,
+and population-level neural trajectories.
+
+This chapter describes visualization techniques used to represent
+event-related responses, time--frequency dynamics, and neural
+population trajectories in latent state space.
+
+\section{ERP Visualization}
+
+Event-related potentials (ERPs) provide a classical representation of
+stimulus-locked neural responses.
+
+For each channel $i$, the ERP waveform is defined as
+
+\begin{equation}
+ERP_i(t) =
+\frac{1}{K}
+\sum_{k=1}^{K}
+x_i^{(k)}(t)
+\end{equation}
+
+where $x_i^{(k)}(t)$ denotes the signal from trial $k$.
+
+ERP visualization typically includes the following elements:
+
+\begin{itemize}
+\item Mean ERP waveform across trials
+\item Shaded confidence intervals representing trial variability
+\item Event markers indicating stimulus onset
+\item Comparison of ERPs across experimental conditions
+\end{itemize}
+
+Confidence intervals are commonly obtained using bootstrap
+resampling of trials.
+
+ERP plots allow identification of characteristic response components
+such as early sensory responses and late cognitive components.
+
+\section{Time--Frequency Maps}
+
+Time--frequency maps visualize oscillatory activity across time
+and frequency.
+
+Let $P(t,f)$ denote the spectral power obtained from wavelet
+transforms.
+
+Time--frequency maps display the quantity
+
+\begin{equation}
+P_{dB}(t,f) =
+10\log_{10}
+\left(
+\frac{P(t,f)}{P_{base}(f)}
+\right)
+\end{equation}
+
+which represents baseline-normalized spectral power.
+
+Time--frequency maps are typically visualized as heatmaps with
+
+\begin{itemize}
+\item time on the horizontal axis
+\item frequency on the vertical axis
+\item color representing spectral power
+\end{itemize}
+
+Statistically significant regions obtained from cluster-based
+permutation tests can be overlaid on these maps to highlight
+reliable oscillatory responses.
+
+\section{Latent Trajectory Visualization}
+
+Latent neural trajectories provide a low-dimensional representation
+of multichannel neural population dynamics.
+
+For each trial $k$, the latent trajectory is defined as
+
+\begin{equation}
+z^{(k)}(t)
+\end{equation}
+
+where $z(t)$ represents the latent neural state.
+
+Condition-averaged trajectories can be visualized in two-dimensional
+latent space by plotting the first two latent components:
+
+\begin{equation}
+(z_1(t), z_2(t))
+\end{equation}
+
+Visualization typically includes
+
+\begin{itemize}
+\item condition-averaged trajectories
+\item single-trial trajectories
+\item markers indicating event onset
+\item arrows indicating trajectory direction
+\end{itemize}
+
+Such plots illustrate how neural population states evolve through
+latent space in response to experimental events.
+
+\section{3D State-Space Visualization}
+
+When the latent state space has more than two dimensions,
+three-dimensional trajectory visualization can provide additional
+insight.
+
+A three-dimensional neural state space is defined by the first
+three latent components:
+
+\begin{equation}
+(z_1(t), z_2(t), z_3(t))
+\end{equation}
+
+Neural trajectories can then be visualized as curves within this
+three-dimensional space.
+
+Key visualization elements include
+
+\begin{itemize}
+\item trajectories for different experimental conditions
+\item color-coded time progression
+\item trajectory start and end markers
+\item rotation of the state-space view to reveal geometric structure
+\end{itemize}
+
+Three-dimensional visualization can reveal rotational dynamics,
+trajectory divergence, and manifold structure that may not be
+apparent in lower-dimensional projections.
+
+\chapter{Computational Implementation}
+
+The SEEG analysis framework described in this report is implemented
+as a modular computational pipeline in MATLAB. The pipeline integrates
+custom analysis functions with the FieldTrip toolbox, which provides
+extensive functionality for electrophysiological data analysis.
+
+The implementation is designed to support reproducible analysis of
+large-scale SEEG datasets while allowing flexible extension for new
+analysis modules.
+
+\section{Pipeline Architecture}
+
+The computational pipeline follows a modular architecture in which
+each stage of the analysis is implemented as a separate processing
+module.
+
+The overall workflow is organized as follows:
+
+\begin{enumerate}
+\item Data loading and preprocessing
+\item Event-locked trial extraction
+\item Trial-level quality control
+\item ERP analysis
+\item Time--frequency analysis
+\item Statistical inference
+\item Multichannel population representation
+\item Dimensionality reduction
+\item Latent trajectory analysis
+\item Dynamical systems analysis
+\item Neural decoding
+\item Visualization and reporting
+\end{enumerate}
+
+Each stage receives structured input data and produces output that
+can be passed to downstream analysis modules.
+
+Data are stored using structured MATLAB objects containing
+
+\begin{itemize}
+\item neural signals
+\item trial metadata
+\item channel labels
+\item event timestamps
+\item analysis parameters
+\end{itemize}
+
+This structure ensures consistent data flow across the entire
+analysis pipeline.
+
+\section{Software Design}
+
+The software implementation emphasizes modularity and separation
+of analysis components.
+
+Each analysis step is implemented as a function that performs a
+specific task. For example:
+
+\begin{itemize}
+\item \texttt{seeg\_preprocess.m} performs filtering and referencing
+\item \texttt{seeg\_epoch.m} extracts event-locked trials
+\item \texttt{seeg\_tf.m} computes time--frequency representations
+\item \texttt{seeg\_latent.m} performs dimensionality reduction
+\item \texttt{seeg\_trajectory.m} constructs neural trajectories
+\item \texttt{seeg\_decode.m} performs neural decoding
+\end{itemize}
+
+This modular structure allows individual analysis components
+to be tested and modified independently.
+
+Integration with the FieldTrip toolbox enables efficient
+implementation of commonly used signal processing functions,
+including
+
+\begin{itemize}
+\item spectral analysis
+\item wavelet transforms
+\item statistical testing
+\item sensor-level visualization
+\end{itemize}
+
+FieldTrip data structures are used where appropriate to maintain
+compatibility with existing electrophysiological analysis tools.
+
+\section{Reproducibility}
+
+Reproducible analysis is essential for reliable scientific results.
+
+To ensure reproducibility, the analysis pipeline incorporates
+several design principles.
+
+First, all analysis parameters are stored in configuration
+structures that accompany each dataset. These configuration
+files specify parameters such as
+
+\begin{itemize}
+\item filtering frequencies
+\item time--frequency analysis parameters
+\item dimensionality reduction settings
+\item statistical thresholds
+\end{itemize}
+
+Second, intermediate results from each processing stage are
+saved to disk. This enables reanalysis of later stages without
+recomputing earlier processing steps.
+
+Third, the entire analysis workflow can be executed using a
+single master script that sequentially calls each analysis
+module. This script ensures that all datasets are processed
+using identical analysis parameters.
+
+Finally, version control systems such as Git can be used to
+track changes to the analysis code and maintain a history
+of modifications to the computational pipeline.
+
+Together, these design principles ensure that SEEG analyses
+can be reproduced, validated, and extended in future studies.
+
+\chapter{Complete MATLAB Pipeline Pseudocode}
+
+This chapter summarizes the full SEEG computational analysis workflow
+in MATLAB-style pseudocode. The goal is to provide a unified view of
+the analysis pipeline from continuous SEEG recordings to neural
+population dynamics, statistical inference, and visualization.
+
+\section{Overall Pipeline}
+
+The complete pipeline consists of the following stages:
+
+\begin{enumerate}
+\item Continuous signal preprocessing
+\item Event-locked trial extraction
+\item Trial-level quality control
+\item ERP estimation
+\item Time--frequency analysis
+\item Oscillatory and phase-based feature extraction
+\item Statistical inference
+\item Multichannel population representation
+\item Dimensionality reduction
+\item Latent trajectory construction
+\item Trajectory geometry and dynamical systems analysis
+\item Neural decoding
+\item Uncertainty quantification
+\item Visualization and reporting
+\end{enumerate}
+
+\section{Main Analysis Routine}
+
+\begin{algorithm}[H]
+\caption{Complete SEEG analysis pipeline}
+\begin{algorithmic}[1]
+\Require Continuous SEEG data $X$, event table $E$, analysis configuration $\Theta$
+\Ensure Analysis results structure $R$
+
+\State Load continuous SEEG recording
+\State Load channel metadata and event table
+\State Initialize results structure $R$
+
+\State $X_{clean} \gets$ \Call{PreprocessSignals}{$X, \Theta$}
+\State $\mathcal{T} \gets$ \Call{ExtractEventLockedTrials}{$X_{clean}, E, \Theta$}
+
+\State $\mathcal{Q} \gets$ \Call{ComputeTrialQualityMetrics}{$\mathcal{T}, \Theta$}
+\State $(\mathcal{T}_{good}, \mathcal{W}) \gets$ \Call{ClassifyAndWeightTrials}{$\mathcal{T}, \mathcal{Q}, \Theta$}
+
+\State $ERP \gets$ \Call{ComputeRobustERP}{$\mathcal{T}_{good}, \mathcal{W}, \Theta$}
+\State $\mathcal{T}_{ind} \gets$ \Call{SubtractERP}{$\mathcal{T}_{good}, ERP$}
+
+\State $TF_{total} \gets$ \Call{ComputeTimeFrequency}{$\mathcal{T}_{good}, \Theta$}
+\State $TF_{ind} \gets$ \Call{ComputeTimeFrequency}{$\mathcal{T}_{ind}, \Theta$}
+\State $ITPC \gets$ \Call{ComputeITPC}{$\mathcal{T}_{good}, \Theta$}
+
+\State $F \gets$ \Call{ExtractNeuralFeatures}{$ERP, TF_{total}, TF_{ind}, ITPC, \Theta$}
+
+\State $S_{ROI} \gets$ \Call{RunROIPermutationTests}{$F, \Theta$}
+\State $S_{TF} \gets$ \Call{RunClusterTFStatistics}{$TF_{ind}, \Theta$}
+\State $S_{onset} \gets$ \Call{EstimateResponseOnset}{$F, \Theta$}
+
+\State $\mathcal{X}_{pop} \gets$ \Call{ConstructPopulationTensor}{$F, \Theta$}
+\State $\mathcal{X}_{norm} \gets$ \Call{NormalizePopulationTensor}{$\mathcal{X}_{pop}, \Theta$}
+
+\State $L \gets$ \Call{FitLatentModel}{$\mathcal{X}_{norm}, \Theta$}
+\State $Z \gets$ \Call{ProjectToLatentSpace}{$\mathcal{X}_{norm}, L, \Theta$}
+\State $Z_{smooth} \gets$ \Call{SmoothLatentTrajectories}{$Z, \Theta$}
+
+\State $G \gets$ \Call{ComputeTrajectoryGeometry}{$Z_{smooth}, \Theta$}
+\State $C \gets$ \Call{ComputeConditionSeparation}{$Z_{smooth}, \Theta$}
+\State $D \gets$ \Call{RunDynamicalSystemsAnalysis}{$Z_{smooth}, \Theta$}
+
+\State $Dec \gets$ \Call{RunNeuralDecoding}{$Z_{smooth}, \Theta$}
+\State $U \gets$ \Call{BootstrapTrajectoryUncertainty}{$Z_{smooth}, \Theta$}
+
+\State \Call{GenerateFigures}{$ERP, TF_{ind}, ITPC, Z_{smooth}, G, C, D, Dec, U$}
+
+\State Store all outputs in $R$
+\State \Return $R$
+\end{algorithmic}
+\end{algorithm}
+
+\section{MATLAB-Oriented Function Layout}
+
+A modular MATLAB implementation can be organized as follows:
+
+\begin{verbatim}
+run_seeg_pipeline.m
+preprocess_signals.m
+extract_event_locked_trials.m
+compute_trial_quality.m
+classify_trials.m
+compute_robust_erp.m
+compute_time_frequency.m
+compute_itpc.m
+extract_neural_features.m
+run_roi_permutation_tests.m
+run_cluster_tf_statistics.m
+estimate_response_onset.m
+construct_population_tensor.m
+fit_latent_model.m
+project_to_latent_space.m
+compute_trajectory_geometry.m
+compute_condition_separation.m
+run_jpca_analysis.m
+run_tangent_space_analysis.m
+run_neural_decoding.m
+bootstrap_trajectory_uncertainty.m
+generate_figures.m
+\end{verbatim}
+
+\section{Master MATLAB Pseudocode}
+
+\begin{verbatim}
+function R = run_seeg_pipeline(X, E, Theta)
+
+    X_clean   = preprocess_signals(X, Theta);
+    Trials    = extract_event_locked_trials(X_clean, E, Theta);
+
+    QC        = compute_trial_quality(Trials, Theta);
+    [Trials, W] = classify_trials(Trials, QC, Theta);
+
+    ERP       = compute_robust_erp(Trials, W, Theta);
+    TrialsInd = subtract_erp(Trials, ERP);
+
+    TFtotal   = compute_time_frequency(Trials, Theta);
+    TFind     = compute_time_frequency(TrialsInd, Theta);
+    ITPC      = compute_itpc(Trials, Theta);
+
+    Feat      = extract_neural_features(ERP, TFtotal, TFind, ITPC, Theta);
+
+    StatsROI  = run_roi_permutation_tests(Feat, Theta);
+    StatsTF   = run_cluster_tf_statistics(TFind, Theta);
+    StatsOn   = estimate_response_onset(Feat, Theta);
+
+    Xpop      = construct_population_tensor(Feat, Theta);
+    Xpop      = normalize_population_tensor(Xpop, Theta);
+
+    Latent    = fit_latent_model(Xpop, Theta);
+    Z         = project_to_latent_space(Xpop, Latent, Theta);
+    Z         = smooth_latent_trajectories(Z, Theta);
+
+    Geom      = compute_trajectory_geometry(Z, Theta);
+    Sep       = compute_condition_separation(Z, Theta);
+    Dyn       = run_dynamical_systems_analysis(Z, Theta);
+
+    Dec       = run_neural_decoding(Z, Theta);
+    Unc       = bootstrap_trajectory_uncertainty(Z, Theta);
+
+    generate_figures(ERP, TFind, ITPC, Z, Geom, Sep, Dyn, Dec, Unc);
+
+    R.ERP     = ERP;
+    R.TF      = TFind;
+    R.ITPC    = ITPC;
+    R.Features= Feat;
+    R.Stats   = struct('ROI',StatsROI,'TF',StatsTF,'Onset',StatsOn);
+    R.Latent  = Z;
+    R.Geometry= Geom;
+    R.Separation = Sep;
+    R.Dynamics   = Dyn;
+    R.Decoding   = Dec;
+    R.Uncertainty= Unc;
+
+end
+\end{verbatim}
+
+\chapter{Algorithm Boxes for Each Analysis Stage}
+
+This chapter summarizes each major analysis module as a standalone
+algorithm box. These algorithmic descriptions are intended to clarify
+the flow of computation and facilitate reproducible implementation.
+
+\section{Signal Preprocessing}
+
+\begin{algorithm}[H]
+\caption{Signal preprocessing}
+\begin{algorithmic}[1]
+\Require Continuous SEEG data $X$
+\Ensure Cleaned signal $X_{clean}$
+
+\State Apply high-pass filter
+\State Apply low-pass filter
+\State Remove line noise with notch filters
+\State Apply offline re-referencing
+\State Detect bad channels using variance and noise metrics
+\State Mark or remove artifact-contaminated segments
+\State \Return $X_{clean}$
+\end{algorithmic}
+\end{algorithm}
+
+\section{Event-Locked Signal Extraction}
+
+\begin{algorithm}[H]
+\caption{Event-locked trial extraction}
+\begin{algorithmic}[1]
+\Require Cleaned signal $X_{clean}$, event table $E$
+\Ensure Trial tensor $\mathcal{T}$
+
+\For{each event $e_k \in E$}
+    \State Extract time window $[-T_{pre}, T_{post}]$
+    \State Align extracted window to event onset
+    \State Store trial data and metadata
+\EndFor
+\State \Return $\mathcal{T}$
+\end{algorithmic}
+\end{algorithm}
+
+\section{Trial-Level Quality Control}
+
+\begin{algorithm}[H]
+\caption{Trial quality control}
+\begin{algorithmic}[1]
+\Require Trial tensor $\mathcal{T}$
+\Ensure Trial quality labels and weights
+
+\For{each trial}
+    \State Compute prestimulus RMS amplitude
+    \State Compute prestimulus variance
+    \State Compute peak-to-peak amplitude
+    \State Compute kurtosis
+    \State Compute line-noise ratio
+    \State Form composite quality score
+    \State Assign trial to green, yellow, or red category
+\EndFor
+\State Assign analysis weights based on category
+\State \Return quality labels and weights
+\end{algorithmic}
+\end{algorithm}
+
+\section{ERP Analysis}
+
+\begin{algorithm}[H]
+\caption{Robust ERP estimation}
+\begin{algorithmic}[1]
+\Require Good trials $\mathcal{T}_{good}$ and weights $\mathcal{W}$
+\Ensure ERP waveform $ERP(t)$
+
+\For{each channel}
+    \State Compute weighted average across trials
+    \State Optionally reject high-leverage outliers
+\EndFor
+\State \Return ERP waveforms
+\end{algorithmic}
+\end{algorithm}
+
+\section{Time--Frequency Analysis}
+
+\begin{algorithm}[H]
+\caption{Morlet wavelet time--frequency analysis}
+\begin{algorithmic}[1]
+\Require Trial signals $\mathcal{T}$
+\Ensure Spectral power $P(t,f)$
+
+\For{each trial}
+    \For{each frequency $f$}
+        \State Construct Morlet wavelet $\psi(t,f)$
+        \State Convolve signal with wavelet
+        \State Compute complex coefficient $Z(t,f)$
+        \State Compute power $P(t,f)=|Z(t,f)|^2$
+    \EndFor
+\EndFor
+\State Normalize power relative to baseline
+\State \Return time--frequency representation
+\end{algorithmic}
+\end{algorithm}
+
+\section{Phase-Based Synchronization}
+
+\begin{algorithm}[H]
+\caption{Inter-trial phase coherence}
+\begin{algorithmic}[1]
+\Require Complex wavelet coefficients $Z_k(t,f)$
+\Ensure $ITPC(t,f)$
+
+\For{each time-frequency point}
+    \State Extract phase $\phi_k(t,f)$ for all trials
+    \State Compute complex unit vectors $e^{i\phi_k(t,f)}$
+    \State Average vectors across trials
+    \State Take magnitude to obtain $ITPC(t,f)$
+\EndFor
+\State \Return ITPC map
+\end{algorithmic}
+\end{algorithm}
+
+\section{ROI-Based Permutation Statistics}
+
+\begin{algorithm}[H]
+\caption{ROI permutation test}
+\begin{algorithmic}[1]
+\Require ROI feature values across trials and conditions
+\Ensure Empirical p-value
+
+\State Compute observed condition difference
+\For{$b=1$ to $B$ permutations}
+    \State Randomly shuffle condition labels
+    \State Recompute ROI difference
+\EndFor
+\State Compare observed difference to null distribution
+\State \Return p-value
+\end{algorithmic}
+\end{algorithm}
+
+\section{Cluster-Based Time--Frequency Statistics}
+
+\begin{algorithm}[H]
+\caption{Cluster-based time--frequency permutation test}
+\begin{algorithmic}[1]
+\Require Time--frequency maps for two conditions
+\Ensure Significant time--frequency clusters
+
+\State Compute pointwise test statistic over time and frequency
+\State Threshold statistic map
+\State Form spatiotemporal clusters
+\State Compute cluster mass for each cluster
+\For{$b=1$ to $B$ permutations}
+    \State Shuffle trial labels
+    \State Recompute cluster masses
+    \State Store maximum cluster mass
+\EndFor
+\State Compare observed cluster masses to permutation null
+\State \Return significant clusters
+\end{algorithmic}
+\end{algorithm}
+
+\section{Response Onset Detection}
+
+\begin{algorithm}[H]
+\caption{Permutation-based onset estimation}
+\begin{algorithmic}[1]
+\Require Time-resolved response statistic
+\Ensure Response onset time $t_{onset}$
+
+\State Compute observed timecourse statistic
+\For{$b=1$ to $B$ permutations}
+    \State Shuffle labels or sign-flip trials
+    \State Recompute timecourse statistic
+    \State Store maximum statistic across time
+\EndFor
+\State Determine corrected threshold
+\State Find earliest timepoint above threshold
+\State \Return $t_{onset}$
+\end{algorithmic}
+\end{algorithm}
+
+\section{Multichannel Population Representation}
+
+\begin{algorithm}[H]
+\caption{Population tensor construction}
+\begin{algorithmic}[1]
+\Require Channel-wise features across trials and time
+\Ensure Population tensor $\mathcal{X}$
+
+\For{each trial}
+    \For{each channel}
+        \State Extract selected neural feature
+        \State Insert feature into tensor
+    \EndFor
+\EndFor
+\State Arrange data as trial $\times$ channel $\times$ time
+\State \Return $\mathcal{X}$
+\end{algorithmic}
+\end{algorithm}
+
+\section{Dimensionality Reduction}
+
+\begin{algorithm}[H]
+\caption{Latent state estimation}
+\begin{algorithmic}[1]
+\Require Population tensor $\mathcal{X}$
+\Ensure Latent states $z(t)$
+
+\State Reshape tensor into population state matrix
+\State Fit dimensionality reduction model (PCA / FA / GPFA)
+\State Project population activity into latent state space
+\State \Return latent trajectories
+\end{algorithmic}
+\end{algorithm}
+
+\section{Latent Neural Trajectories}
+
+\begin{algorithm}[H]
+\caption{Latent trajectory construction}
+\begin{algorithmic}[1]
+\Require Latent states across time and trials
+\Ensure Single-trial and condition-averaged trajectories
+
+\For{each trial}
+    \State Construct sequence of latent states over time
+\EndFor
+\For{each condition}
+    \State Average trajectories across trials
+\EndFor
+\State \Return latent trajectories
+\end{algorithmic}
+\end{algorithm}
+
+\section{Trajectory Geometry}
+
+\begin{algorithm}[H]
+\caption{Trajectory geometry metrics}
+\begin{algorithmic}[1]
+\Require Latent trajectories $z(t)$
+\Ensure Velocity, curvature, dispersion, and path length
+
+\State Compute temporal derivatives of trajectory
+\State Estimate velocity magnitude
+\State Estimate curvature from first and second derivatives
+\State Compute path length as cumulative displacement
+\State Compute across-trial dispersion
+\State \Return geometric metrics
+\end{algorithmic}
+\end{algorithm}
+
+\section{Condition Separation}
+
+\begin{algorithm}[H]
+\caption{Condition separation in latent space}
+\begin{algorithmic}[1]
+\Require Condition-specific trajectories
+\Ensure Time-resolved separation metric
+
+\State Compute centroid trajectory for each condition
+\For{each timepoint}
+    \State Compute inter-condition distance
+    \State Compute within-condition dispersion
+    \State Form separation statistic
+\EndFor
+\State Assess significance using permutation testing
+\State \Return separation timecourse
+\end{algorithmic}
+\end{algorithm}
+
+\section{Rotational Dynamics}
+
+\begin{algorithm}[H]
+\caption{jPCA-based rotational dynamics analysis}
+\begin{algorithmic}[1]
+\Require Latent trajectory $z(t)$
+\Ensure Rotational components and rotational plane
+
+\State Compute temporal derivative $\dot{z}(t)$
+\State Fit linear model $\dot{z}(t)=Mz(t)$
+\State Constrain $M$ to skew-symmetric form
+\State Compute eigenvectors of rotational dynamics matrix
+\State Project latent states into rotational plane
+\State \Return rotational trajectories
+\end{algorithmic}
+\end{algorithm}
+
+\section{Tangent Space Dynamics}
+
+\begin{algorithm}[H]
+\caption{Tangent-space analysis}
+\begin{algorithmic}[1]
+\Require Latent trajectories for multiple conditions
+\Ensure Tangent vectors and principal angle statistics
+
+\State Estimate tangent vectors by finite differences
+\State Build tangent subspace for each condition
+\State Compute principal angles between subspaces
+\State Optionally test significance by permutation
+\State \Return tangent-space similarity metrics
+\end{algorithmic}
+\end{algorithm}
+
+\section{Geometry of Neural Manifolds}
+
+\begin{algorithm}[H]
+\caption{Neural manifold geometry}
+\begin{algorithmic}[1]
+\Require Latent trajectories
+\Ensure Manifold geometry descriptors
+
+\State Compute covariance of latent states
+\State Estimate state-space occupancy
+\State Compute recurrence matrix
+\State Estimate subspace overlap across conditions
+\State \Return manifold geometry measures
+\end{algorithmic}
+\end{algorithm}
+
+\section{Neural Decoding}
+
+\begin{algorithm}[H]
+\caption{Latent-state decoding}
+\begin{algorithmic}[1]
+\Require Latent states $z^{(k)}(t)$ and labels $y^{(k)}$
+\Ensure Decoding accuracy and statistical significance
+
+\For{each timepoint or analysis window}
+    \State Split trials into training and test sets
+    \State Train classifier on training set
+    \State Evaluate classifier on test set
+    \State Store decoding accuracy
+\EndFor
+\State Generate null accuracy distribution by label permutation
+\State Estimate p-values and decoding onset
+\State \Return decoding results
+\end{algorithmic}
+\end{algorithm}
+
+\section{Uncertainty Quantification}
+
+\begin{algorithm}[H]
+\caption{Bootstrap uncertainty estimation}
+\begin{algorithmic}[1]
+\Require Single-trial trajectories
+\Ensure Confidence intervals and confidence tubes
+
+\For{$b=1$ to $B$ bootstrap iterations}
+    \State Resample trials with replacement
+    \State Recompute condition-averaged trajectory
+    \State Recompute trajectory statistics
+\EndFor
+\State Compute percentile-based confidence intervals
+\State Estimate covariance of bootstrap trajectories
+\State Construct confidence tubes around mean trajectory
+\State \Return uncertainty estimates
+\end{algorithmic}
+\end{algorithm}
+
+\section{Visualization and Reporting}
+
+\begin{algorithm}[H]
+\caption{Visualization of neural dynamics}
+\begin{algorithmic}[1]
+\Require Analysis outputs from all stages
+\Ensure Summary figures and report panels
+
+\State Plot ERP waveforms with confidence intervals
+\State Plot time--frequency power maps
+\State Plot latent trajectories in 2D and 3D
+\State Plot rotational planes and decoding curves
+\State Plot confidence tubes and separation metrics
+\State Export figures for report generation
+\end{algorithmic}
+\end{algorithm}
+
+\input{result}
+
+\chapter{Discussion}
+
+This chapter discusses the implications of population-level
+SEEG analysis for understanding neural dynamics in the human brain.
+
+\chapter{Conclusion}
+
+The proposed computational framework integrates classical
+electrophysiological analysis with modern neural population
+dynamics approaches, enabling comprehensive investigation of
+multichannel SEEG activity.
+
+
+
+\end{document}

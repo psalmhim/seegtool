@@ -1,0 +1,92 @@
+{
+  "day1": {
+    "ses-task05": {
+      "task_start_sec": 678.016,
+      "task_end_sec": 1010.633,
+      "segment_start_sec": 673.016,
+      "segment_end_sec": 1015.633,
+      "edf_source": "/remotenas2/YUHS/SEEG_PSYCHOPY/260311/STUDY001.EDF"
+    },
+    "ses-task06": {
+      "task_start_sec": 1080.848,
+      "task_end_sec": 1307.098,
+      "segment_start_sec": 1075.848,
+      "segment_end_sec": 1312.098,
+      "edf_source": "/remotenas2/YUHS/SEEG_PSYCHOPY/260311/STUDY001.EDF"
+    },
+    "ses-task01": {
+      "task_start_sec": 1586.825,
+      "task_end_sec": 1900.77,
+      "segment_start_sec": 1581.825,
+      "segment_end_sec": 1905.77,
+      "edf_source": "/remotenas2/YUHS/SEEG_PSYCHOPY/260311/STUDY001.EDF"
+    },
+    "ses-task03": {
+      "task_start_sec": 1965.77,
+      "task_end_sec": 2370.418,
+      "segment_start_sec": 1960.77,
+      "segment_end_sec": 2375.418,
+      "edf_source": "/remotenas2/YUHS/SEEG_PSYCHOPY/260311/STUDY001.EDF"
+    },
+    "ses-task02": {
+      "task_start_sec": 2530.106,
+      "task_end_sec": 2879.95,
+      "segment_start_sec": 2525.106,
+      "segment_end_sec": 2884.95,
+      "edf_source": "/remotenas2/YUHS/SEEG_PSYCHOPY/260311/STUDY001.EDF"
+    },
+    "ses-task04": {
+      "task_start_sec": 2969.286,
+      "task_end_sec": 3356.961,
+      "segment_start_sec": 2964.286,
+      "segment_end_sec": 3360.74951171875,
+      "edf_source": "/remotenas2/YUHS/SEEG_PSYCHOPY/260311/STUDY001.EDF"
+    }
+  },
+  "day2": {
+    "viseme_run01": {
+      "task_start_sec": 238.902,
+      "task_end_sec": 998.512,
+      "segment_start_sec": 233.902,
+      "segment_end_sec": 1003.512,
+      "edf_source": "/remotenas2/YUHS/SEEG_PSYCHOPY/260312/STUDY002.EDF"
+    },
+    "viseme_run02": {
+      "task_start_sec": 1595.602,
+      "task_end_sec": 2332.945,
+      "segment_start_sec": 1590.602,
+      "segment_end_sec": 2337.945,
+      "edf_source": "/remotenas2/YUHS/SEEG_PSYCHOPY/260312/STUDY002.EDF"
+    },
+    "visemegen_run01": {
+      "task_start_sec": 477.771,
+      "task_end_sec": 1182.654,
+      "segment_start_sec": 472.771,
+      "segment_end_sec": 1186.06201171875,
+      "edf_source": "/remotenas2/YUHS/SEEG_PSYCHOPY/260312/STUDY003.EDF"
+    }
+  },
+  "day3": {
+    "viseme_run03": {
+      "task_start_sec": 244.256,
+      "task_end_sec": 1041.795,
+      "segment_start_sec": 239.256,
+      "segment_end_sec": 1046.795,
+      "edf_source": "/remotenas2/YUHS/SEEG_PSYCHOPY/260313/STUDY004.EDF"
+    },
+    "rhythm_run01": {
+      "task_start_sec": 1377.518,
+      "task_end_sec": 2152.461,
+      "segment_start_sec": 1372.518,
+      "segment_end_sec": 2157.461,
+      "edf_source": "/remotenas2/YUHS/SEEG_PSYCHOPY/260313/STUDY004.EDF"
+    },
+    "rhythm_run02": {
+      "task_start_sec": 2827.42,
+      "task_end_sec": 3979.705,
+      "segment_start_sec": 2822.42,
+      "segment_end_sec": 3984.705,
+      "edf_source": "/remotenas2/YUHS/SEEG_PSYCHOPY/260313/STUDY004.EDF"
+    }
+  }
+}
