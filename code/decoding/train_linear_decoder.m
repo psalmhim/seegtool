@@ -18,17 +18,20 @@ function model = train_linear_decoder(X_train, y_train, method)
         case 'lda'
             class_means = zeros(n_classes, n_features);
             S_w = zeros(n_features);
+            class_counts = zeros(n_classes, 1);
             for c = 1:n_classes
                 if iscell(classes)
                     idx = strcmp(y_train, classes{c});
                 else
                     idx = y_train == classes(c);
                 end
+                class_counts(c) = sum(idx);
                 class_means(c, :) = mean(X_train(idx, :), 1, 'omitnan');
                 centered = X_train(idx, :) - class_means(c, :);
-                S_w = S_w + centered' * centered;
+                % Weight each class equally regardless of sample count
+                S_w = S_w + (centered' * centered) / max(class_counts(c), 1);
             end
-            S_w = S_w / size(X_train, 1);
+            S_w = S_w / n_classes;
             % Stronger regularization to prevent singular matrix
             S_w = S_w + 1e-3 * eye(n_features);
             model.class_means = class_means;

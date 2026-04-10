@@ -1,5 +1,7 @@
-function [accuracy, predictions, fold_acc] = run_cross_validation(X, y, n_folds, method)
+function [accuracy, predictions, fold_acc] = run_cross_validation(X, y, n_folds, method, fold_idx)
 % RUN_CROSS_VALIDATION K-fold stratified cross-validation.
+%   Optional fold_idx argument allows reusing a fixed fold assignment
+%   (e.g., to maintain consistent splits across timepoints).
     if nargin < 3, n_folds = 5; end
     if nargin < 4, method = 'lda'; end
 
@@ -20,13 +22,15 @@ function [accuracy, predictions, fold_acc] = run_cross_validation(X, y, n_folds,
     X(isnan(X)) = 0;
     X(isinf(X)) = 0;
 
-    % Stratified fold assignment
-    fold_idx = zeros(n_samples, 1);
-    for c = 1:n_classes
-        c_idx = find(y_numeric == c);
-        c_idx = c_idx(randperm(numel(c_idx)));
-        for i = 1:numel(c_idx)
-            fold_idx(c_idx(i)) = mod(i - 1, n_folds) + 1;
+    % Use provided fold assignment or create new one
+    if nargin < 5 || isempty(fold_idx)
+        fold_idx = zeros(n_samples, 1);
+        for c = 1:n_classes
+            c_idx = find(y_numeric == c);
+            c_idx = c_idx(randperm(numel(c_idx)));
+            for i = 1:numel(c_idx)
+                fold_idx(c_idx(i)) = mod(i - 1, n_folds) + 1;
+            end
         end
     end
 

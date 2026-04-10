@@ -1,5 +1,7 @@
 function [p_values, null_dist] = permutation_test_decoding(latent_tensor, condition_labels, observed_accuracy, n_perms, n_folds, method)
 % PERMUTATION_TEST_DECODING Permutation test for decoding significance.
+%   Shuffles condition labels while maintaining consistent fold structure
+%   across timepoints within each permutation.
     if nargin < 4, n_perms = 100; end
     if nargin < 5, n_folds = 5; end
     if nargin < 6, method = 'lda'; end

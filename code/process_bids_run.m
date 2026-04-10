@@ -491,7 +491,19 @@ function summary = process_bids_run(bids_root, subject, run_info, results_dir)
         fprintf('[Stage 14] Neural decoding... SKIP\n');
     else
         fprintf('\n[Stage 14] Neural decoding...\n');
-        if numel(unique(s5.condition_labels)) > 1
+        % Check condition balance: need at least n_cv_folds samples per class
+        uniq_conds = unique(s5.condition_labels);
+        min_class_count = Inf;
+        for ci = 1:numel(uniq_conds)
+            if iscell(s5.condition_labels)
+                cc = sum(strcmp(s5.condition_labels, uniq_conds{ci}));
+            else
+                cc = sum(s5.condition_labels == uniq_conds(ci));
+            end
+            min_class_count = min(min_class_count, cc);
+        end
+
+        if numel(uniq_conds) > 1 && min_class_count >= cfg.n_cv_folds
             pca_model = [];
             if isfield(s11, 'latent_model') && isfield(s11.latent_model, 'W')
                 pca_model = s11.latent_model;
@@ -502,7 +514,12 @@ function summary = process_bids_run(bids_root, subject, run_info, results_dir)
             save(sf('stage14_decoding'), 'decoding', '-v7.3');
             clear decoding pop_tensor;
         else
-            fprintf('[Stage 14] Single condition - skipping\n');
+            if numel(uniq_conds) <= 1
+                fprintf('[Stage 14] Single condition - skipping\n');
+            else
+                fprintf('[Stage 14] Imbalanced conditions (min class=%d < %d folds) - skipping\n', ...
+                    min_class_count, cfg.n_cv_folds);
+            end
             decoding = struct();
             save(sf('stage14_decoding'), 'decoding');
         end

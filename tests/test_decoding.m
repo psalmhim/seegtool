@@ -55,8 +55,7 @@ classdef test_decoding < matlab.unittest.TestCase
 
         function test_cross_validation_folds(testCase)
             % Verify that the cross-validation procedure produces the
-            % correct number of folds and that every sample appears in
-            % exactly one test fold.
+            % correct number of folds and that every sample gets a prediction.
             rng(3);
             nSamples  = 100;
             nFeatures = 5;
@@ -65,30 +64,50 @@ classdef test_decoding < matlab.unittest.TestCase
             X = randn(nSamples, nFeatures);
             y = randi(2, nSamples, 1);
 
-            [acc, fold_results] = run_cross_validation(X, y, nFolds);
+            [acc, predictions, fold_acc] = run_cross_validation(X, y, nFolds);
 
-            testCase.verifyLength(fold_results, nFolds, ...
-                'Number of fold results does not match nFolds.');
+            testCase.verifyLength(fold_acc, nFolds, ...
+                'Number of fold accuracies does not match nFolds.');
 
-            % Collect all test indices and verify full coverage
-            all_test_idx = [];
-            for f = 1:nFolds
-                all_test_idx = [all_test_idx; fold_results(f).test_idx(:)]; %#ok<AGROW>
+            % Every sample should have a non-zero prediction
+            testCase.verifyEqual(numel(predictions), nSamples, ...
+                'Predictions vector length should match nSamples.');
+            testCase.verifyTrue(all(predictions > 0), ...
+                'All samples should have a non-zero prediction.');
+        end
+
+        function test_cross_validation_fixed_folds(testCase)
+            % Verify that providing a fixed fold_idx produces consistent results.
+            rng(6);
+            nSamples  = 100;
+            nFeatures = 5;
+            nFolds    = 5;
+
+            X = randn(nSamples, nFeatures);
+            y = [ones(nSamples/2, 1); 2*ones(nSamples/2, 1)];
+
+            % Create fixed folds
+            fold_idx = zeros(nSamples, 1);
+            for i = 1:nSamples
+                fold_idx(i) = mod(i - 1, nFolds) + 1;
             end
-            testCase.verifyEqual(sort(all_test_idx), (1:nSamples)', ...
-                'Not all samples were used in exactly one test fold.');
+
+            [acc1, ~, ~] = run_cross_validation(X, y, nFolds, 'lda', fold_idx);
+            [acc2, ~, ~] = run_cross_validation(X, y, nFolds, 'lda', fold_idx);
+
+            testCase.verifyEqual(acc1, acc2, ...
+                'Fixed fold_idx should produce identical accuracy.');
         end
 
         function test_time_resolved_shape(testCase)
             % Time-resolved decoding output should have one accuracy value
-            % per time point.
+            % per time point, with consistent fold structure.
             rng(4);
             nTrials   = 80;
             nTime     = 50;
             nFeatures = 10;
             nFolds    = 5;
 
-            % X: [nTrials x nFeatures x nTime]
             X = randn(nTrials, nFeatures, nTime);
             y = randi(2, nTrials, 1);
 
@@ -102,20 +121,44 @@ classdef test_decoding < matlab.unittest.TestCase
             % The permutation null distribution should be centered near
             % chance level (0.5 for binary).
             rng(5);
-            nSamples  = 100;
+            nTrials   = 100;
             nFeatures = 5;
-            nPerms    = 200;
+            nTime     = 10;
+            nPerms    = 50;
             nFolds    = 5;
 
-            X = randn(nSamples, nFeatures);
-            y = randi(2, nSamples, 1);
+            % permutation_test_decoding expects a 3D tensor
+            X = randn(nTrials, nFeatures, nTime);
+            y = randi(2, nTrials, 1);
 
-            null_dist = permutation_test_decoding(X, y, nFolds, nPerms);
+            observed_acc = run_time_resolved_decoding(X, y, nFolds);
+            [p_values, null_dist] = permutation_test_decoding(X, y, observed_acc, nPerms, nFolds);
 
-            testCase.verifyLength(null_dist, nPerms, ...
-                'Null distribution length should equal nPerms.');
-            testCase.verifyEqual(mean(null_dist), 0.5, 'AbsTol', 0.1, ...
+            testCase.verifySize(null_dist, [nPerms, nTime], ...
+                'Null distribution shape should be [nPerms, nTime].');
+            testCase.verifySize(p_values, [1, nTime], ...
+                'P-values shape should be [1, nTime].');
+            testCase.verifyEqual(mean(null_dist(:)), 0.5, 'AbsTol', 0.1, ...
                 'Null distribution should be centered near chance.');
+        end
+
+        function test_onset_post_stimulus_only(testCase)
+            % Onset detection should only find post-stimulus timepoints.
+            rng(7);
+            time_vec = linspace(-0.5, 2.0, 100);
+            accuracy = 0.5 * ones(1, 100);
+            p_values = ones(1, 100);
+
+            % Make pre-stimulus significant (should be ignored)
+            p_values(1:10) = 0.001;
+            % Make post-stimulus significant
+            post_idx = find(time_vec >= 0.5, 5, 'first');
+            p_values(post_idx) = 0.001;
+
+            [onset_time, ~] = estimate_decoding_onset(accuracy, p_values, time_vec);
+
+            testCase.verifyGreaterThanOrEqual(onset_time, 0, ...
+                'Decoding onset should be post-stimulus (>= 0).');
         end
 
     end
