@@ -36,8 +36,8 @@ function cfg = default_config()
     cfg.qc_weights.p2p = 1.0;
     cfg.qc_weights.kurt = 0.5;
     cfg.qc_weights.line_noise = 0.5;
-    cfg.qc_green_threshold = 1.5;
-    cfg.qc_red_threshold = 3.0;
+    cfg.qc_green_threshold = 3.0;
+    cfg.qc_red_threshold = 5.0;
 
     % Time-frequency analysis
     cfg.freq_range = [2, 150];

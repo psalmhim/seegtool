@@ -16,7 +16,10 @@ function erp = compute_weighted_erp(trial_tensor, weights)
     w_sum = sum(weights);
 
     if w_sum == 0
-        error('compute_weighted_erp:zeroWeights', 'Sum of weights is zero.');
+        warning('compute_weighted_erp:zeroWeights', ...
+            'Sum of weights is zero. Using uniform weights.');
+        weights = ones(size(weights));
+        w_sum = sum(weights);
     end
 
     n_channels = size(trial_tensor, 2);

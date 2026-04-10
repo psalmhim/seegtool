@@ -424,6 +424,25 @@ function summary = process_bids_run(bids_root, subject, run_info, results_dir)
     if is_done(sf('stage11_latent'))
         fprintf('[Stage 10-11] Population + Latent dynamics... SKIP\n');
         s11 = load(sf('stage11_latent'));
+        % Backward compat: recompute missing fields from old stage file
+        needs_resave = false;
+        if ~isfield(s11, 'cond_indices')
+            [~, s11.cond_indices] = make_condition_labels(s1.stim_events, 1:s4.n_trials);
+            s11.cond_trajectories = compute_condition_averaged_trajectories(s11.latent_tensor, s11.cond_indices);
+            fprintf('  (regenerated cond_indices)\n');
+            needs_resave = true;
+        end
+        if ~isfield(s11, 'latent_model')
+            fprintf('  (latent_model missing — re-running PCA)\n');
+            pop_tensor = build_population_tensor(s4.trial_tensor, 'voltage');
+            pop_tensor = normalize_population_tensor(pop_tensor, 'zscore');
+            s11.latent_model = fit_latent_model(pop_tensor, cfg);
+            clear pop_tensor;
+            needs_resave = true;
+        end
+        if needs_resave
+            save(sf('stage11_latent'), '-struct', 's11', '-v7.3');
+        end
     else
         fprintf('\n[Stage 10] Population dynamics...\n');
         pop_tensor = build_population_tensor(s4.trial_tensor, 'voltage');
@@ -702,9 +721,15 @@ function result = build_result_for_viz(run_output, s1, s4, s5, cfg)
     end
     if isfile(sf('stage11_latent'))
         s = load(sf('stage11_latent'));
-        result.latent_model = s.latent_model;
-        result.cond_trajectories = s.cond_trajectories;
-        result.cond_indices = s.cond_indices;
+        if isfield(s, 'latent_model')
+            result.latent_model = s.latent_model;
+        end
+        if isfield(s, 'cond_trajectories')
+            result.cond_trajectories = s.cond_trajectories;
+        end
+        if isfield(s, 'cond_indices')
+            result.cond_indices = s.cond_indices;
+        end
     end
     if isfile(sf('stage12_geometry'))
         s = load(sf('stage12_geometry'));

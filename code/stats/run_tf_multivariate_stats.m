@@ -283,12 +283,25 @@ function results = run_band_contrasts(tf_power, condition_labels, conditions, fr
             pair_idx = pair_idx + 1;
             idx_A = strcmp(condition_labels, conditions{ci});
             idx_B = strcmp(condition_labels, conditions{cj});
+            n_A = sum(idx_A); n_B = sum(idx_B);
 
             r = struct();
             r.cond_A = conditions{ci};
             r.cond_B = conditions{cj};
             r.band_results = struct();
             r.any_significant = false;
+
+            % Skip band contrasts when either group has < 2 trials
+            if n_A < 2 || n_B < 2
+                if isempty(results)
+                    results = r;
+                else
+                    results(end+1) = r;
+                end
+                fprintf('  [Band] %s vs %s: skipped (n_A=%d, n_B=%d)\n', ...
+                    conditions{ci}, conditions{cj}, n_A, n_B);
+                continue;
+            end
 
             for bi = 1:numel(band_names)
                 bname = band_names{bi};
@@ -297,14 +310,15 @@ function results = run_band_contrasts(tf_power, condition_labels, conditions, fr
                 if ~any(freq_mask); continue; end
 
                 % Band power: average across freq within band → trials x ch x time
-                bp_A = squeeze(mean(tf_power(idx_A, :, freq_mask, :), 3, 'omitnan'));
-                bp_B = squeeze(mean(tf_power(idx_B, :, freq_mask, :), 3, 'omitnan'));
+                % Use reshape instead of squeeze to preserve trial dimension
+                bp_A_raw = mean(tf_power(idx_A, :, freq_mask, :), 3, 'omitnan');
+                bp_B_raw = mean(tf_power(idx_B, :, freq_mask, :), 3, 'omitnan');
+                bp_A = reshape(bp_A_raw, n_A, size(tf_power, 2), []);
+                bp_B = reshape(bp_B_raw, n_B, size(tf_power, 2), []);
 
-                % Channel-averaged band power for cluster test: trials x 1 x time
-                bp_A_avg = squeeze(mean(bp_A, 2, 'omitnan'));  % trials x time
-                bp_B_avg = squeeze(mean(bp_B, 2, 'omitnan'));
-
-                n_A = sum(idx_A); n_B = sum(idx_B);
+                % Channel-averaged band power for cluster test: trials x time
+                bp_A_avg = reshape(mean(bp_A, 2, 'omitnan'), n_A, []);
+                bp_B_avg = reshape(mean(bp_B, 2, 'omitnan'), n_B, []);
 
                 % Pointwise t-test across time
                 mean_A = mean(bp_A_avg, 1, 'omitnan');
@@ -485,13 +499,16 @@ function mvpa = run_tf_mvpa(tf_power, condition_labels, conditions, freqs, time_
     labels = [ones(numel(idx_A), 1); -ones(numel(idx_B), 1)];
     n_total = numel(all_idx);
 
-    if n_total < 2 * n_folds
-        mvpa = struct('accuracy', [], 'note', 'insufficient trials');
+    min_class = min(numel(idx_A), numel(idx_B));
+    if n_total < 2 * n_folds || min_class < n_folds
+        mvpa = struct('accuracy', [], 'note', 'insufficient trials or class imbalance');
+        fprintf('[MVPA-TF] Skipped: n_A=%d, n_B=%d (need >= %d per class)\n', ...
+            numel(idx_A), numel(idx_B), n_folds);
         return;
     end
 
-    % Create CV folds
-    cv = crossvalind_simple(n_total, n_folds);
+    % Create stratified CV folds
+    cv = stratified_cv_folds(labels, n_folds);
 
     % Time-resolved decoding
     accuracy = zeros(1, n_time);
@@ -556,7 +573,7 @@ function mvpa = run_tf_mvpa(tf_power, condition_labels, conditions, freqs, time_
 
     % Interpolate to full time vector
     if numel(time_idx) < n_time
-        accuracy_full = interp1(time_idx, accuracy, 1:n_time, 'linear', 0.5);
+        accuracy_full = interp1(time_idx, accuracy(time_idx), 1:n_time, 'linear', 0.5);
     else
         accuracy_full = accuracy;
     end
@@ -602,6 +619,10 @@ end
 function w = lda_classify(X, y)
 % Simple regularized LDA.
     classes = unique(y);
+    if numel(classes) < 2
+        w = zeros(size(X, 2), 1);
+        return;
+    end
     mu1 = mean(X(y == classes(1), :), 1);
     mu2 = mean(X(y == classes(2), :), 1);
     n1 = sum(y == classes(1));
@@ -648,6 +669,21 @@ function cv = crossvalind_simple(n, k)
             cv(idx((f-1)*fold_size + 1 : f*fold_size)) = f;
         else
             cv(idx((f-1)*fold_size + 1 : end)) = f;
+        end
+    end
+end
+
+
+function cv = stratified_cv_folds(labels, k)
+% Stratified k-fold CV: each fold has proportional class representation.
+    n = numel(labels);
+    cv = zeros(n, 1);
+    classes = unique(labels);
+    for c = 1:numel(classes)
+        c_idx = find(labels == classes(c));
+        c_idx = c_idx(randperm(numel(c_idx)));
+        for i = 1:numel(c_idx)
+            cv(c_idx(i)) = mod(i - 1, k) + 1;
         end
     end
 end
